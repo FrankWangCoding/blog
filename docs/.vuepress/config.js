@@ -5,9 +5,8 @@ module.exports = {
   head: [
     ['link', { rel: 'icon', href: '/image/favicon.ico' }]
   ],
-  lastUpdated: '最后更新时间',
-  lastUpdated: true,
   themeConfig: {
+    lastUpdated: '最后更新时间',
     nav: [
       {
         text: '首页',
