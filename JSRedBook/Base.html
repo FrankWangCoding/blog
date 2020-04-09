@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>JavaScript 简介 | 爬坑中的王小二</title>
+    <meta name="description" content="个人的一些总结，随意写写">
+    <meta name="generator" content="VuePress 1.4.0">
+    <link rel="icon" href="/blog/image/favicon.ico">
+    
+    <link rel="preload" href="/blog/assets/css/0.styles.592fc07d.css" as="style"><link rel="preload" href="/blog/assets/js/app.5f258496.js" as="script"><link rel="preload" href="/blog/assets/js/2.69aed249.js" as="script"><link rel="preload" href="/blog/assets/js/5.b4328a1d.js" as="script"><link rel="prefetch" href="/blog/assets/js/3.382f85a8.js"><link rel="prefetch" href="/blog/assets/js/4.7a4d83b2.js"><link rel="prefetch" href="/blog/assets/js/6.44f356c9.js"><link rel="prefetch" href="/blog/assets/js/7.92c00a1b.js"><link rel="prefetch" href="/blog/assets/js/8.5bf72370.js"><link rel="prefetch" href="/blog/assets/js/9.d5ac8c0a.js">
+    <link rel="stylesheet" href="/blog/assets/css/0.styles.592fc07d.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/blog/" class="home-link router-link-active"><!----> <span class="site-name">爬坑中的王小二</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/blog/" class="nav-link">
+  首页
+</a></div><div class="nav-item"><a href="/blog/JSRedBook/Base.html" class="nav-link router-link-exact-active router-link-active">
+  博客
+</a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/blog/" class="nav-link">
+  首页
+</a></div><div class="nav-item"><a href="/blog/JSRedBook/Base.html" class="nav-link router-link-exact-active router-link-active">
+  博客
+</a></div> <!----></nav>  <ul class="sidebar-links"><li><section class="sidebar-group collapsable depth-0"><p class="sidebar-heading open"><span>JavaScript高级程序设计笔记</span> <span class="arrow down"></span></p> <ul class="sidebar-links sidebar-group-items"><li><a href="/blog/JSRedBook/Base.html" class="active sidebar-link">JavaScript 简介</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/JSRedBook/Base.html#javascript-实现组成" class="sidebar-link">Javascript 实现组成</a></li><li class="sidebar-sub-header"><a href="/blog/JSRedBook/Base.html#ecma规定的内容" class="sidebar-link">ECMA规定的内容</a></li><li class="sidebar-sub-header"><a href="/blog/JSRedBook/Base.html#ecma兼容定义" class="sidebar-link">ECMA兼容定义</a></li><li class="sidebar-sub-header"><a href="/blog/JSRedBook/Base.html#dom级别" class="sidebar-link">DOM级别</a></li><li class="sidebar-sub-header"><a href="/blog/JSRedBook/Base.html#bom" class="sidebar-link">BOM</a></li></ul></li><li><a href="/blog/JSRedBook/UseJSInHtml.html" class="sidebar-link">在HTML中使用Javascript</a></li><li><a href="/blog/JSRedBook/BaseContent.html" class="sidebar-link">基本概念</a></li></ul></section></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="javascript-简介"><a href="#javascript-简介" class="header-anchor">#</a> JavaScript 简介</h1> <h2 id="javascript-实现组成"><a href="#javascript-实现组成" class="header-anchor">#</a> Javascript 实现组成</h2> <ul><li>核心是ECMAScript</li> <li>文档对象模型（DOM）</li> <li>浏览器对象模型（BOM）</li></ul> <h2 id="ecma规定的内容"><a href="#ecma规定的内容" class="header-anchor">#</a> ECMA规定的内容</h2> <ul><li>语法</li> <li>类型</li> <li>语句</li> <li>关键字</li> <li>保留字</li> <li>操作符</li> <li>对象</li></ul> <h2 id="ecma兼容定义"><a href="#ecma兼容定义" class="header-anchor">#</a> ECMA兼容定义</h2> <ul><li>支持ECMA-262描述的所有&quot;类型、值、对象、属性、函数以及程序句法和语义</li> <li>支持Unicode字符标准</li> <li>可支持以下拓展:
+<ul><li>添加ECMA-262没有描述的&quot;更多类型、值、对象、属性、函数&quot;</li> <li>支持ECMA-262没有定义的程序和正则表达式</li></ul></li></ul> <h2 id="dom级别"><a href="#dom级别" class="header-anchor">#</a> DOM级别</h2> <ul><li>DOM1
+<ul><li>DOM核心：规定的是如何映射基于XML的文档结构，以便于简化对文档中任意部分的访问和操作。</li> <li>DOMHTML: 在DOM核心的基础上加以拓展，添加对HTML的对象和方法。</li></ul></li></ul> <p>DOM1的主要目标是映射文档的结构。</p> <ul><li>DOM2
+<ul><li>补充鼠标和用户界面事件、范围、遍历（迭代DOM文档方法）等细分模块。而且通过对象接口增加对CSS的支持。</li></ul></li></ul> <h2 id="bom"><a href="#bom" class="header-anchor">#</a> BOM</h2> <ul><li>弹出新浏览器窗口的功能。</li> <li>移动、缩放和关闭浏览器窗口的功能。</li></ul></div> <footer class="page-edit"><!----> <!----></footer> <div class="page-nav"><p class="inner"><!----> <span class="next"><a href="/blog/JSRedBook/UseJSInHtml.html">
+        在HTML中使用Javascript
+      </a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/blog/assets/js/app.5f258496.js" defer></script><script src="/blog/assets/js/2.69aed249.js" defer></script><script src="/blog/assets/js/5.b4328a1d.js" defer></script>
+  </body>
+</html>
