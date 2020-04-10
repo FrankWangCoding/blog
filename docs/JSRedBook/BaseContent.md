@@ -506,6 +506,127 @@ ECMAScript中有五种（实际上现在为6种，es6中新增了Symbol）简单
    var oldValue = -64;
    var newValue = oldValue >>> 5; // 134217726
    ```
+- 布尔操作符
+   布尔运算符一共包括三个：非（NOT）、与（AND）和或（OR）。
+
+   1. 逻辑非
+
+   逻辑非运算符由一个叹号（！）表示，可以应用于ECMA中的任何值。逻辑非运算符首先会将它的操作数转换为一个布尔值，然后对其求反。逻辑非遵循如下规则：
+    - 如果操作数是一个对象，返回false。
+    - 如果操作数是一个空字符串，返回true。
+    - 如果操作数是一个非空字符串，返回false。
+    - 如果操作数是一个数0，返回true。
+    - 如果操作数是任何非0数值（包括Infinity），返回false。
+    - 如果操作数是null，返回true。
+    - 如果操作数是NaN，返回true。
+    - 如果操作数是undefined，返回true。
+     
+    ```js
+    alert(!false); // true
+    alert(!"blue"); // false
+    alert(!0); // true
+    alert(!NaN); // true
+    alert(!""); // true
+    alert(!12345); // false
+    ```
+
+    逻辑非也可以用于将一个值转换为与其相对应的布尔值。同时使用两个逻辑非可以实现这样的转换，结果与直接使用Boolean()函数相同。
+    ```js
+    alert(!!"blue"); // true
+    alert(!!0); // false
+    alert(!!NaN); //false
+    alert(!!""); // false
+    alert(!!12345) // true
+    ```
+
+   2. 逻辑与
+
+   逻辑与操作符由两个和号（&&）表示，有两个操作数。 
+
+   ```js
+   var result = true && false;
+   ```
+
+   逻辑与的真值表如下:
+
+   | 第一个操作数 | 第二个操作数 | 结果 |
+   |:-:|:-:|:-:|
+   true | true | true |
+   true | false | false |
+   false | true | false |
+   false | false | false |
+
+   逻辑与操作符可以应用于任何类型的操作数，而不仅仅是布尔值。在有一个操作数不是布尔值的情况下，逻辑与操作就不一定返回布尔值。此时它遵循如下规则：
+
+    - 如果第一个操作数是对象，则返回第二个操作数。
+    - 如果第二个操作数是对象，则只有在第一个操作数的求值结果为true情况下才会返回该对象。
+    - 如果两个操作数都是对象，则返回第二个操作数。
+    - 如果第一个操作数是null，则返回null。
+    - 如果第一个操作数是NaN，则返回NaN。
+    - 如果第一个操作数是undefined，则返回undefined。
+
+   逻辑与运算符属于短路操作，一旦第一个操作数能决定结果就不会往后走。在逻辑与中，如果使用未定义的值会有发生错误的情况出现。
+   ```js
+   var found = true;
+   var result = (found && someUndefinedVariable); // 这里会报错
+   alert(result); // 这行不会执行
+   ```
+   但是如果上个例子的found值设置为false，这里就会发生短路，后面的值不再验证。
+   ```js
+   var found = false;
+   var result = (found && someUndefinedVariable); //不会报错
+   alert(result); // false
+   ```
+
+   3.逻辑或
+
+   逻辑或操作符由两个竖线符号（||）表示，有两个操作数。
+
+   ```js
+   var result = true || false;
+   ```
+
+   逻辑或的真值表如下：
+
+   | 第一个操作数 | 第二个操作数 | 结果
+   |:-:|:-:|:-:|
+   true | true | true |
+   true | false | true |
+   false | true | true |
+   false | false | false |
+
+   与逻辑与操作相似，如果一个操作数不是布尔值，逻辑或也不一定返回布尔值。此时有以下规则：
+
+    - 如果第一个操作数是对象，则返回第一个操作数。
+    - 如果第一个操作数的求值结果为false，则返回第二个操作数、
+    - 如果两个操作数都是对象，则返回第一个操作数。
+    - 如果两个操作数都是null，则返回null。
+    - 如果两个操作数都是NaN，则返回NaN。
+    - 如果两个操作数都是undefined，则返回undefined。
+
+   与逻辑与操作符相似，逻辑或操作符也是短路运算符。也就是说，如果第一个操作数的求值结果为true，那么不会对第二个操作数求值。在逻辑或运算中使用未定义的值，同样会有报错的情况出现。
+   ```js
+   var found = false;
+   var result = (found || someUndefinedVariable); // 这里会报错
+   alert(result) // 这一行不会执行
+   ```
+   但是如果上述例子的found是true，这里就会发生短路，就不会对第二个操作求值。
+   ```js
+   var found = true;
+   var result = (found || someUndefinedValuable); // 不会发生错误
+   alert(result) // true
+   ```
+   可以利用上面的这种行为来避免变量赋值null或者undefined值。例如：
+   ```js
+   var myObject = preferredObject || backupObject
+   ```
+
+   只要有一个值不是null或者undefined，那么结果就返回第一个有效的值。
+   
+   
+   
+
+
 
 
 
