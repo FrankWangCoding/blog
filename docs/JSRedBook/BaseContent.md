@@ -1149,8 +1149,55 @@ ECMAScript中有五种（实际上现在为6种，es6中新增了Symbol）简单
 
 ## 函数
 
-  未完待续...
+ECMAScript中的函数使用function关键字来声明，后跟一组参数及函数体。基本语法如下所示：
 
+function functionName(args,arg1...argn) {
+  statements
+}
 
+关于return的规律如下：
+  - 函数通过retur语句跟要返回的值来实现返回值。
+  - 函数return语句执行后立即退出函数。
+  - 函数return语句可以单独执行，返回值为undefined。（实际上不写return的函数，默认返回值也是undefined）
+
+严格模式下对函数有一些限制：
+  - 不能把函数命名为eval或arguments。
+  - 不能把参数命名为eval或arguments。
+  - 不能出现两个命名参数同名的情况。
+
+如果发生以上错误，就会导致语法错误，代码无法执行。
+
+1. 参数
+
+ECMAScript中的参数在内部是用一个数组表示的（其实应该是类数组），实际上在函数体内可以通过arguments对象来访问这个参数数组，从而获取传递给函数的每一个参数。
+
+arguments只是与数组类似（它并不是Array的实例，证实了它是一个类数组）
+
+我们可以通过在argumengts上做手脚，从而实现重载功能。(通过判断arguments.length来实现)
+
+```js
+function doAdd(num1,num2) {
+  if (arguments.length === 1) {
+    alert(num1 + 10);
+  } else (arguments.length === 2) {
+    alert(arguments[0] + num2)
+  }
+}
+```
+
+关于arguments还有三个特点：
+  - arguments的值永远与对应命名参数的值保持同步。(arguments和传参的内存空间是独立的，但是他们的值会同步)
+  ```js
+  function doAdd(num1,num2) {
+    arguments[1] = 10;
+    alert(arguments[0] + num2) // 只传入一个参数的时候，arguments[1]不会起作用，所以调用doAdd(1)时，结果仍然是NaN。
+  }
+  ```
+  - arguments对象的长度是由传入参数的个数决定的，而不是由定义函数时的命名参数个数决定的。
+  - 没有传递命名参数将自动被赋予undefined值。
+
+2. 没有重载
+  
+  function没有重载，可以通过arguments模拟，前面已经说明，不再赘述。
 
 
