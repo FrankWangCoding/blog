@@ -622,12 +622,534 @@ ECMAScript中有五种（实际上现在为6种，es6中新增了Symbol）简单
    ```
 
    只要有一个值不是null或者undefined，那么结果就返回第一个有效的值。
+- 乘性操作符
+
+  ECMAScript中定义了三个乘性运算符：乘法、除法和求模。这些操作符与Java、C、Perl中的相应运算符用途类似，只不过在操作数为非数值的情况下，会执行自动的类型转换。如果参与乘性计算的某个操作数不是数值，后台会先使用Number()转型函数将其转成数值。
+  1. 乘法
+
+  乘法操作符由一个星号（*）表示，用于计算两个数值的乘积。
+
+  ```js
+  var result = 34 * 56;
+  ```
+
+  在处理特殊值的情况下，乘法操作符遵循下列特殊的规则：
+
+     - 如果操作数都是数值，执行常规的乘法计算。即两个正数或两个负数相乘的结果还是正数，而如果只有一个数有符号，那么结果就是负数。如果乘积超过了ECMAScript的表示范围，则返回Infinity或-Infinity。
+     - 如果有一个操作数是NaN,则结果为NaN。
+     - 如果是Infinity与0相乘，则结果为NaN。
+     - 如果是Infinity与非0数值相乘，则结果是Infinity或-Infinity，取决于有符号操作数的符号。
+     - 如果是Infinity和Infinity相乘，则结果是Infinity。
+     - 如果有一个操作数不是数值，则在后台调用Number()将其转换为数值，然后再应用上面的规则。
+
+  2. 除法
+
+  除法操作符由一个斜线符号（/）表示，执行第二个操作数除以第一个操作数的计算。
+
+  ```js
+  var result = 66 / 11;
+  ```
+
+  与乘法操作符相似，除法操作符对特殊的值也有特殊的处理规则：
+
+     - 如果操作数都是数值，执行常规的除法计算，即两个正数或者两个负数相除的结果还是正数，而如果只有一个操作数有符号，那么结果就是负数。如果商超过了ECMAScript的表示范围，那么返回Infinity或-Infinity。
+     - 如果有一个操作数是NaN,则结果是NaN。
+     - 如果是Infinity被Infinity除，则结果是NaN。
+     - 如果是零被零除，则结果是NaN。
+     - 如果是非零的有限数被零除，则结果是Infinity或-Infinity，取决于有符号操作数的符号。
+     - 如果是Infinity被任何非零数值除，则结果是Infinity或-Infinity，取决于有符号操作数的符号。
+     - 如果有一个操作数不是数值，则在后台调用Number()转换为数值，然后再应用上述规则。
+  
+  3. 求模
+
+  求模（余数）操作符由一个百分号表示。
+
+  ```js
+  var result = 26 % 5; // 1
+  ```
+  
+  与另外两个操作符类似，求模操作符会遵循下列特殊规则来处理特殊的值：
+
+    - 如果操作数都是数值，执行常规的除法计算，返回除得的余数。
+    - 如果被除数是无穷大值而除数是有限大的数值，则结果是NaN。
+    - 如果被除数是有限大的数值而除数是零，则结果是NaN。
+    - 如果是Infinity被Infinity除，则结果是NaN。
+    - 如果被除数是有限大的数值而除数是无限大的数值，则结果是被除数。
+    - 如果被除数是零，则结果是零。
+    - 如果有一个操作数不是数值，则在后台调用Number()将其转化为数值，然后再应用上述规则。
+
+- 加性操作符
+
+   1. 加法
+
+   如果两个操作符都是数值，执行常规的加法计算，然后根据下列规则返回结果：
+
+     - 如果有一个操作数是NaN，则结果是NaN。
+     - 如果是Infinity加Infinity，则结果是Infinity。
+     - 如果是-Infinity加-Infinity，则结果是-Infinity。
+     - 如果是Infinity加-Infinity，则结果是NaN。
+     - 如果是+0加+0，则结果是+0。
+     - 如果是-0加-0，则结果是-0。
+     - 如果是+0加-0，则结果是+0。
+  
+   如果有一个操作数是字符串就要用如下的规则：
+    
+     - 如果两个操作数都是字符串，则将第二个操作数与第一个拼接起来。
+     - 如果只有一个操作数是字符串，则将另一个操作数转化为字符串，然后再将两个字符串拼接起来。
+
+   如果有一个操作数是对象、数值或者布尔值，则调用他们的toString()方法取得相应的字符串值，然后再应用前面的规则。对于undefined和null，则分别调用String()函数并取得"undefined"和"null"。
+   忽略加法操作中的数据类型是ECMAScript中的常见错误。比较典型的例子是下面这样：
+
+   ```js
+   var result1 = 5 + 5;
+   alert(result1); // 10
+   var result2 = 5 + "5";
+   alert(result2) // "55"
+   ```
+
+   ```js
+   var num1 = 5;
+   var num2 = 10;
+   var message = "The sum of 5 and 10 is " + num1 + num2;
+   alert(message); // "The sum of 5 and 10 is 510."
+   ```
    
+   但是如果确定了计算的优先级，用括号将需要优先计算的结果括起来。那结果又有所不同：
+
+   ```js
+   var num1 = 5;
+   var num2 = 10;
+   var message = "The sum of 5 and 10 is " + (num1 + num2);
+   alert(message); // "The sum of 5 and 10 is 15."
+   ```
+
+   关于运算符的优先级其实可以参考这里，在这里我们可以看出，小括号是优先级最高的。[运算符优先级](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Operators/Operator_Precedence)
+  
+   2. 减法
+
+   ECMAScript中的减法操作符在处理各种数据类型转换时同样需要遵循一些特殊规则：
+
+     - 如果两个操作符都是数值，则执行常规的算术减法操作并返回结果。
+     - 如果有一个操作数是NaN，则结果是NaN。
+     - 如果是Infinity减Infinity，则结果是NaN。
+     - 如果是Infinity减-Infinity，则结果是Infinity。
+     - 如果是-Infinity减Infinity，则结果是-Infinity。
+     - 如果是+0减+0，则结果是+0。
+     - 如果是-0减+0，则结果是-0。
+     - 如果是-0减-0，则结果是+0。
+     - 如果有一个操作符是字符串、布尔值、null或undefined。则先在后台调用Number()函数转换为数值。然后再根据前面的规则进行减法计算。如果转换的结果是NaN,那么计算的结果就是NaN。
+     - 如果有一个操作数是对象，则调用这个对象的valueOf()方法以取得表示该对象的数值。如果得到的值是NaN，则减法的结果就是NaN。如果对象没有valueOf()方法，则调用其toString()方法，调用其toString()方法并将得到的字符串转换为数值。
+
+     ```js
+     var result1 = 5 - true; // 4,因为true被转换成了1。
+     var result2 = NaN - 1; // NaN
+     var result3 = 5 - 3; // 2
+     var result4 = 5 - ""; // 因为""被转换成了0。
+     var result5 = 5 - "2"; // 3,因为"2"被转换成了2
+     var result6 = 5 - null; // 5,因为null被转换成了0。
+     var result7 = 5 - {
+       valueOf:function () {
+         return 1
+       }
+     } // 4
+     var result8 = 5 - {
+       toString:function () {
+         return "1"
+       }
+     } // 结果同样是4，因为走了toString先转换字符串，并将字符串转换为数值。
+     ```
    
+   3.关系操作符
    
+   小于（<），大于（>），小于等于（<=），大于等于（>=）这几个关系操作符用于对两个值作比较。这几个操作符都返回一个布尔值。
+
+   当关系操作符的操作数使用了非数值时，也要进行数值转换或完成某些奇怪的操作。下面是相应的规则。
+
+     - 如果两个操作数都是数值，则执行数值比较。
+     - 如果两个操作数都是字符串，则比较两个字符串对应的字符编码值。
+     - 如果一个操作数是数值，则将另一个操作数转换为数值再进行比较。
+     - 如果一个操作数是对象，则调用这个对象的valueOf()方法，并用得到的结果根据前面的规则执行比较。
+     - 如果一个操作数是布尔值，则先将其转换为数值，然后再执行比较。
+     - 任何操作数数与NaN比较，结果都返回false。
+
+     下面的几个例子，有个别会比较奇异和古怪，但是我们按照上面的规则进行分析就会觉得很正常了。
+
+     ```js
+     var result1 = "Brick" < "alphabet" // true，因为B的字符编码为66，a的字符编码为97，第一位小，所以自然就小。
+     var result2 = "Brick".toLowerCase() < "alphabet".toLowerCase() // false，都变成小写那比较结果就正常了。
+     var result3 = "23" < "3" // true，因为此时比较的是他们的字符串编码，2的字符编码小于3，所以是true。
+     var result4 = "23" < 3 // false，此时都按照数值进行比较。
+     var result5 = "a" < 3 // false，"a"被转成了NaN,任何操作数与NaN比较都是false
+     var result6 = NaN >= 3 // false,任何操作数与NaN比较都是false
+     var result7 = NaN < 3 // false,任何操作数与NaN比较都是false
+     ```
+- 相等运算符
+   相等（==）是先转换后比较，而全等（===）是仅比较而不转换。
+   1. 相等和不相等
+     ECMAScript中的相等操作是由两个相等符号表示（==），如果两个操作数相等，返回true。不相等操作符由叹号后跟等于号（!=）表示，如果两个操作数不相等，返回true。这两个操作符都会先转换操作数，然后再比较他们的相等性。
+
+     在转换不同的数据类型时，相等和不相等操作符遵循下列规则：
+       - 如果有一个操作数是布尔值，则在比较相等性之前先将其转换为数值，false变成0，true变成1。
+       - 如果一个操作数是字符串，另一个操作数是数值，在比较相等性之前先将字符串转换为数值。
+       - 如果一个操作数是对象，另一个操作数不是，则调用对象的valueOf()方法，用得到的基本类型值按照前面的规则进行比较。
+
+     这两个操作符进行比较时要遵循这些规则：
+       - null和undefined是相等的。
+       - 要比较相等性之前不能将null和undefined转成其他值。
+       - 如果有一个操作数是NaN，则相等操作符返回false，而不相等操作符返回true。因为即便两个操作数都是NaN，也不相等（NaN不等于自身）
+       - 如果两个操作数都是对象，则比较它们是不是同一个对象。如果两个操作数都指向的是同一个对象，则相等操作符返回true，否则返回false。（比较地址，而非比较值）
+
+     下面是一些特殊情况及结果：
+
+     | 表达式 | 值 |
+     |:-:|:-:|
+     null == undefined | true |
+     "NaN" == NaN | false |
+     5 == NaN | false |
+     NaN == NaN | false |
+     NaN != NaN | true |
+     false == 0 | true |
+     true == 1 | true |
+     true == 2 | false |
+     undefined == 0 | false |
+     null == 0 | false |
+     "5" == 5 | true |
+
+     总结：比较相等的时候优先向数值上转换。然后null和undefined不得在比较之前转换成任何值。
+
+   2.全等和不全等
+     类型与值全相等才是全等，否则就不是全等。
+   
+- 条件操作符
+  即三元表达式。格式如下：
+  variable = boolean_expression ? true_value : false_value
+
+- 赋值操作符
+
+  每个主要算数操作符（以及个别的其它操作符）都有对应的复合操作符。如下所示：
+     - 乘赋值（*=）
+     - 除赋值（/=）
+     - 模赋值（%=）
+     - 加赋值（+=）
+     - 减赋值（-=）
+     - 左移赋值（<<=）
+     - 有符号右移赋值（>>=）
+     - 无符号右移赋值（>>>=）
+     
+  使用这些赋值运算符的目的主要就是简化赋值操作。他们不会带来任何操作上的提升。
 
 
+## 语句
+  
+  1. if语句
 
+  if语句的语法如下：
+
+  if(condition) statement1 else statement2
+
+  推荐使用代码块，而不是上面的这种形式。例如：
+
+  ```js
+  if(i > 25) {
+    alert("Greater than 25");
+  } else {
+    alert("Less than or equal to 25");
+  }
+  ```
+
+  如果涉及到多个条件的时候则像下面的这种形式：
+  ```js
+  if(i > 25) {
+    alert("Greater than 25");
+  } else if (i < 0) {
+    alert("Less than 0");
+  } else {
+    alert("Between 0 and 25,inclusive");
+  }
+  ```
+
+  2. do-while语句
+
+  do-while语句是一种测试循环语句，只有循环体内的代码执行后，才能测试出口条件。适用于最少要执行一次的情况。下面是语法：
+
+  do {
+    statement
+  } while (expression);
+
+  下面是一个示例：
+
+  ```js
+  var i = 0;
+  do {
+    i = i + 2;
+  } while (i > 10);
+    
+  alert(i)
+  ```
+  3. while语句
+
+  while语句属于前测试循环语句。也就是说，在循环体的代码被执行之前，就会对出口条件求值。因此，循环体内的代码可能永远不会被执行。下面是while语句的语法：
+
+  while(expression) statement
+
+  下面是一个例子:
+
+  ```js
+  var i = 0;
+  while(i < 10) {
+    i += 2;
+  }
+  ```
+
+  4. for语句
+  for语句也是一种前测试循环语句，但它具有在执行循环之前初始化变量和定义循环后要执行的代码的能力。以下是for语句的语法：
+
+  for(initialization;expression;post-loop-expression) statement
+
+  下面是一个示例：
+
+  ```js
+  var count = 10;
+  for(var i = 0;i < count; i++) {
+    alert(i);
+  }
+  ```
+
+  该代码与while语句实现的下述代码功能相同。即while做不到的功能，for一样也做不到。for所做的只是把与循环有关的代码集中在一个位置。
+
+  ```js
+  var count = 10;
+  var i = 0;
+  while (i < count) {
+    alert(i);
+    i++;
+  }
+  ```
+
+  由于ECMAScript中不存在块级作用域，因此在循环内部定义的变量也可以在外部访问到。
+
+  ```js
+  var count = 10;
+  for(var i = 0;i < count; i++) {
+    alert(i)
+  }
+  alert(i) // 10，实际上这里发生了变量提升。
+  ```
+
+  for语句中的初始化表达式、控制表达式和循环后表达式都是可选的。这三个语句全部忽略，就会创建一个无限循环。只有控制表达式，实际上就将for循环转换成了while循环。
+
+  ```js
+  for (;;) {
+    doSomething();
+  }
+  ```
+
+  ```js
+  var count = 10;
+  var i = 0;
+  for(;i<count;) {
+    alert(i);
+    i++
+  }
+  ```
+
+  5. for-in语句
+
+  for-in语句是一种精准的迭代语句，可以用来枚举对象的属性。以下是for-in语句的语法：
+
+  for (property in expression) statement（循环的是key值，和ES6最新的for-of有所区别,后者循环的是每一个value值）
+
+  下面是一个示例：
+
+  ```js
+  for (var propName in window) {
+    document.write(propName);
+  }
+  ```
+
+  由于ECMAScript中的对象没有顺序。因此，通过for-in循环输出的属性的顺序是无法预测的，具体来说，所有属性都会被返回一次，但是先后的顺序可能因浏览器而异。
+
+  ES5之前，如果迭代的对象的值是null、undefined，for-in语句会发生错误，ES5更正了这一行为，不再发生错误，只是不执行循环体。为了保证兼容性，尽量检测确认一下对象的值不是null或undefined。
+
+  6. label语句
+
+  使用label语句可以在代码中添加标签，以便于将来使用。以下是label语句的用法：
+
+  label:statement
+
+  下面是一个示例：
+
+  ```js
+  start: for (var i = 0; i < count; i++) {
+    alert(i);
+  }
+  ```
+
+  这个例子中定义的state标签可以在将来由break或continue语句引用。加标签的语句一般都要与for语句等循环语句配合使用。
+
+  7. break和continue语句
+
+  break语句会立即退出循环，强制继续执行循环后面的语句。（注：一个break只能退出一层循环）
+
+  continue语句也会退出循环，但是退出循环后会从循环的顶部继续执行。（即只是退出当前的这一次，不中断整体的循环）
+
+  ```js
+  var num = 0;
+  for (var i = 1; i < 10; i++) {
+    if (i % 5) {
+      break;
+    }
+    num++;
+  }
+  alert(num);
+  ```
+
+  ```js
+  var num = 0;
+  for (var i = 1; i < 10; i++) {
+    if (i % 5 == 0) {
+      continue;
+    }
+    num++;
+  }
+  alert(num);
+  ```
+
+  break和continue语句都可以与label语句联合使用，从而返回代码中特定的位置。这种联合使用的情况多发生在循环嵌套的情况下，如下面的例子所示：
+  ```js
+  var num = 0;
+  outermost:
+  for (var i = 0; i < 10; i++) {
+    for (var j = 0; j < 10; j++) {
+      if (i == 5 && j == 5) {
+        break outermost;
+      }
+      num++;
+    }
+  }
+  alert(num); // 55，因为每次num都加一，在第六趟大循环时，j=5的时候，它前面已经加了5次，所以结果是55
+  ```
+
+  ```js
+  var num = 0;
+  outermost:
+  for (var i = 0; i < 10; i++) {
+    for (var j = 0; j < 10; j++) {
+      if (i == 5 && j == 5) {
+        continue outermost;
+      }
+      num++;
+    }
+  }
+  alert(num); // 95，因为每次num都加一，在第六趟大循环时，
+  // j=5的时候，它前面已经加了5次，此时跳过全部的后面的循环，从外部重新进行
+  // 所以而这个时候，i=6继续进行循环，总共也只忽略了5次，所以结果是95。
+  ```
+
+  虽然联用break，continue和label语句能够执行复杂的操作，但是如果过度使用也会带来麻烦。所以，如果使用label语句，一定要使用描述性的标签，且不要嵌套过多。
+
+  8. with语句
+
+  with语句的作用是将代码的作用域设置到一个特定的对象中。with的语法如下：
+
+  with (expression) statement;
+
+  定义with语句的目的主要是为了简化多次编写同一对象的工作。例如如下代码：
+
+  ```js
+  var qs = location.search.substring(1);
+  var hostName = location.hostname;
+  var url = location.href;
+  ```
+  
+  这种代码就可以用with语句优化。
+
+  ```js
+  with(location) {
+    var qs = search.substring(1);
+    var hostName = hostname;
+    var url = href;
+  }
+  ```
+
+  在重写的例子中，使用with语句关联了location对象。这意味着在with语句的代码块内部，每个变量首先认为是一个局部变量，而如果在局部环境中找不到该变量的定义，就会查询location对象中是否有同名的属性。如果发现了同名属性，则以location对象属性的例子作为变量的值。
+
+  注意，严格模式下不允许使用with语句，否则被判定为语法错误。而且大量使用with语句会导致性能下降，同时也会给调试代码造成困难。
+
+  9. switch语句
+
+  语法形式：
+
+  switch (expression) {
+    case value: statement
+      break;
+    case value: statement
+      break;
+    case value: statement
+      break;
+    case value: statement
+      break;
+    default: statement    
+  }
+
+  switch语句主要是避免程序员过度使用if...else if...else。
+  
+  假如确实混合了几种情形，不要忘了在代码中添加注释，说明是有意省略break关键字。
+
+  ```js
+  switch (i) {
+    case 25:
+      /* 合并两种情形 */
+    case 35:
+      alert("25 or 35");
+      break;
+    case 45:
+      alert("45");
+      break;
+    default:
+      alert("Other");
+  }
+  ```
+
+  switch语句中使用任何数据类型，无论是字符串，还是对象都没有问题。
+
+  ```js
+  switch("hello world") {
+    case "hello" + " world":
+      alert("Greeting was found.");
+      break;
+    case "goodbye":
+      alert("Closeing was found.");
+      break;
+    default:
+      alert("Unexpected message was found.");
+  }
+  ```
+
+  使用表达式作为case值还可以实现下列操作：
+
+  ```js
+  var num = 25;
+  switch (true) {
+    case num < 0:
+      alert("Less than 0.");
+      break;
+    case num >=0 && num <= 10:
+      alert("Between 0 and 10.");
+      break;
+    case num > 10 && num <= 20:
+      alert("Between 10 and 20.");
+      break;
+    default:
+      alert("More than 20.");
+  }
+  ```
+
+  switch语句在比较值的时候使用的是全等操作符（===），所以不会发生类型转换。
+
+## 函数
+
+  未完待续...
 
 
 
