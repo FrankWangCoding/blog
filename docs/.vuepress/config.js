@@ -25,6 +25,12 @@ module.exports = {
           '/JSRedBook/UseJSInHtml.md',
           '/JSRedBook/BaseContent.md'
         ]
+      }, {
+        title: '前端面试修炼手册',
+        collapsable: true, // 是否折叠
+        children: [
+          '/FrontendInterview/JavascriptBase.md'
+        ]
       }
     ],
     markdown: {
