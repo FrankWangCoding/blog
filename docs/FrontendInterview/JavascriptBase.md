@@ -515,8 +515,215 @@ function deepClone(obj) {
 }
 ```
 
-## 原型
+## 对象和原型
 
-未完待续...
+创建对象的三种方式
+1. 字面量
+
+```js
+var a = { name:'frank', age:27 }
+```
+
+2. Object构造函数
+
+```js
+var a = new Object();
+a.name = 'frank'
+a.age = 27
+```
+
+3. 利用Object.create()
+需要注意的是，如果保持跟上述结果一致，需要将构造函数的原型传入才行，否则只会简单的挂载到该对象的原型上。Object.create是以现有的对象作为新对象的`__proto__`(即原型），详情见MDN上关于Object.create()的定义，说的很清楚明了。所以第三种方式也就出来了。[MDN上关于Object.create的定义](https://developer.mozilla.org/zh-CN/docs/Web/JavaScript/Reference/Global_Objects/Object/create)
+
+```js
+var a = Object.create(Object.prototype)
+a.name = 'frank'
+a.age = 27
+```
+
+4. 利用构造函数
+
+```js
+function Person(name,age) {
+  this.name = name
+  this.age = age
+}
+var a = new Person('frank',27)
+```
+
+理解数据属性和访问器属性
+
+刚看到这两个属性新手可能有点懵逼，这是啥？他们都是用来定义对象，可以认为是控制器。下面就来为你揭开这神秘的面纱。
+
+1.  数据属性
+
+  我们通常用的上面的那种字面量赋的属性的值和动态赋值都是用的这里面的value属性，而我们对他的其他几个属性并不了解。下面来科普下：
+
+  - configurable: 表示是否可以用delete来删除属性从而重新定义属性、能否修改对象的属性或者是否把属性改为访问器属性。如果此配置为false，则delete操作无效，非严格模式下啥都不会发生，严格模式下会报错。
+  - enumerable: 表示能否通过for-in循环返回属性，如果此配置为false，那就for-in访问不到该属性。
+  - writable: 表示能否修改属性的值。如果此配置为false，则此属性不可改。
+  - value: 包含这个属性的数据值，也就是我们常用来给予属性的值。读取数据的时候，从这个位置读，写入属性的时候把值保存在这里。
+
+  使用通常的方式（字面量、动态赋值等）给予值的时候，除value外其他三个属性都是true，而使用Object.defineProperty赋值的时候，其他三个属性默认都是false。（如果调用Object.defineProperty只是用来修改已定义属性的值，则没有这样的限制）
+  
+  而且一旦把属性变成不可配置的，就无法把它再变成可配置的了。
+
+  ```js
+  var person = {}
+  Object.defineProperty(person,"name",{
+    configurable: false,
+    value: "frank"
+  })
+  // 抛错
+  Object.defineProperty(person,"name",{
+    configurable: true,
+    value: "frank" 
+  })
+  ```
+
+2. 访问器属性：
+
+访问器属性，名如其名，可以控制对象的读和写，是否可以访问。这里有四个属性，当然有两个属性我们前面已经接触过了。
+
+- configurable: 表示是否可以用delete来删除属性从而重新定义属性、能否修改对象的属性或者是否把属性改为访问器属性。如果此配置为false，则delete操作无效，非严格模式下啥都不会发生，严格模式下会报错。
+- enumerable: 表示能否通过for-in循环返回属性，如果此配置为false，那就for-in访问不到该属性。
+- get：在读取数据的时候调用的函数。默认值undefined。
+- set：在写数据的时候调用的函数。默认值undefined。
+
+只指定getter意味着属性不能写，尝试写入属性会被忽略。只指定setter函数的属性也不能读，否则在非严格模式下会返回undefined，严格模式下会抛错。
+
+原型
+
+未完待续...(这部分实在不好写，我还没想好要怎么下笔)
+
+## new一个对象的时候发生了什么
+
+这个直接引用MDN上的回答：
+
+1. 创建一个空的简单JavaScript对象（即{}）；
+2. 链接该对象（即设置该对象的构造函数）到另一个对象 ；
+3. 将步骤1新创建的对象作为this的上下文 ；
+4. 如果该函数没有返回对象，则返回this。
+
+
+如何自己实现一个new？
+
+```js
+function createNew(fn,...args) {
+  var o = Object.create(fn.prototype) // 这里创建了一个对象，并将构造函数设置到这个对象的原型上
+  var k = fn.apply(o,args) // 改变this指向，并返回一个值
+  return typeof k === 'object' ? k : o // 确定该值是否是一个对象，如果是的话，那就返回，如果不是，说明原构造函数有返回值。
+}
+function Person(name) {
+    this.name = name
+}
+var a = createNew(Person,'frank') // a:{name:"frank"}
+```
+
+## 继承
+
+实际上继承的根本原理就是原型链。大体上分为构造函数继承和原型链继承两种方式。
+
+1. 最原始的构造函数继承
+
+```js
+function Parent(name) {
+  this.name = name
+}
+function Child() {
+  Parent.call(this,'frank')
+  this.age = '27'
+}
+```
+
+这里我们使用了`call`改变了构造函数的`this`指向，使得父级构造函数得以继承。然后我们又附加了自己的属性。但是这样有一个弊病就是`Parent`构造函数在原型链上的内容无法继承过来。
+
+2.最原始的原型链继承
+
+```js
+function Parent(name) {
+  this.name = name
+}
+function Child() {
+  this.age = '27'
+}
+Child.prototype = new Parent('frank')
+```
+
+这里我们给了函数的原型指向了一个新的`Parent`对象，使得原型挂载了该对象的值。但是原型有一个弊病就是，原型上的内容是公用的，如果拥有相同`Parent`构造函数的对象做了改变，那么其他的也会受影响。
+
+那么上面的两种方式各自解决了不同的问题，也各自有难以解决的痛点，那么把他俩一结合不就完了么。对，所以组合继承来了：
+
+组合继承
+
+```js
+function Parent(name) {
+  this.name = name
+}
+function Child() {
+  Parent.call(this,'frank')
+  this.age = 27
+}
+Child.prototype = new Parent()
+```
+
+组合继承解决了构造函数和原型链上的内容继承，但是组合继承也有一定的弊病，Parent构造函数被调用了两次。所以下面是针对组合继承的改良
+
+组合继承的改良1
+
+```js
+function Parent(name) {
+  this.name = name
+}
+function Child() {
+  Parent.call(this,'frank')
+  this.age = 27
+}
+Child.prototype = Parent.prototype
+```
+
+这样倒是避免了重复调用的问题，提升了性能。但是在判断由`Child`构造函数new出来的对象的时候会发生判断类型的错误：
+![优化代码出现constuctor不对的情况](../.vuepress/public/sources/JSBase/proto1.png)
+
+在这里我们可以看到该对象原型的`constructor`是`Parent`而不是`Child`，意味着`instanceof`操作符失效，无法正确的判断这个是`Child`的实例。所以稍微构想了下，我们就有如下的解决方案。
+
+组合继承的改良2（最终方案）
+```js
+function Parent(name) {
+  this.name = name
+}
+function Child() {
+  Parent.call(this,'frank')
+  this.age = 27
+}
+Child.prototype = Object.create(Parent.prototype)
+Child.prototype.constructor = Child
+```
+
+在这里我们用了`Object.create`去新建了一个对象，用来指向该构造函数的原型，然后我们将原型的`constructor`手动指回`Child`构造函数，那么这样的话，类型判断就正确了。
+
+![正确指示类型判断](../.vuepress/public/sources/JSBase/proto2.png)
+
+## 作用域和作用域链
+
+1. 作用域
+
+在JavaScript中，分为两种作用域：全局作用域和函数作用域。
+
+全局作用域：在代码任何的位置都可以访问。
+
+函数作用域：只限于在函数的内部访问，函数执行结束之后被销毁。
+
+作用域的最大好处就是隔离变量，不同作用域下的同名变量不会有冲突（尽管如此，我们仍然建议不要用相同的名字的变量）
+
+2.作用域链
+
+一般情况下，变量取值到创建这个变量的函数的作用域中取值。但是如果在当前作用域中没有查到值，就会向上级作用域去查，直到查到全局作用域，这么一个查找过程形成的链条就叫做作用域链。(先直接盗图了，这个画的比较清晰)
+
+![作用域链](../.vuepress/public/sources/JSBase/scopeLink.png)
+
+
+
+
 
 
