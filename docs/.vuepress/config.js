@@ -31,6 +31,12 @@ module.exports = {
         children: [
           '/FrontendInterview/JavascriptBase.md'
         ]
+      }, {
+        title: '优秀博客记录',
+        collapsable: true, 
+        children: [
+          '/UsefulBlogs/UsefulBlogs.md'
+        ]
       }
     ],
     markdown: {
