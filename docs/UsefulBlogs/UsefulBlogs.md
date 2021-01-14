@@ -4,3 +4,6 @@
 ## TypeScript部分
 
 [TypeScript 高级类型总结（含代码案例）](https://segmentfault.com/a/1190000038869363)
+
+## Webpack部分
+[小红书面试官：介绍一下 tree shaking 及其工作原理](https://juejin.cn/post/6917053287846035463)
