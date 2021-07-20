@@ -25,18 +25,19 @@ module.exports = {
           '/JSRedBook/UseJSInHtml.md',
           '/JSRedBook/BaseContent.md'
         ]
-      }, {
-        title: '前端面试修炼手册',
-        collapsable: true, // 是否折叠
-        children: [
-          '/FrontendInterview/JavascriptBase.md'
-        ]
-      }, {
-        title: '优秀博客记录',
-        collapsable: true, 
-        children: [
-          '/UsefulBlogs/UsefulBlogs.md'
-        ]
+      // }, {
+      //   title: '前端面试修炼手册',
+      //   collapsable: true, // 是否折叠
+      //   children: [
+      //     '/FrontendInterview/JavascriptBase.md'
+      //   ]
+      // }, {
+      //   title: '优秀博客记录',
+      //   collapsable: true, 
+      //   children: [
+      //     '/UsefulBlogs/UsefulBlogs.md'
+      //   ]
+      // }
       }
     ],
     markdown: {
