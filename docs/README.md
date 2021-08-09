@@ -3,5 +3,5 @@ home: true
 heroImage: /image/avatar.jpeg
 actionText: 点此进入 →
 actionLink: /JSRedBook/Base.md
-footer: 愿你以渺小启程，以伟大结束。
+footer: 不积跬步无以至千里，不积小流无以成江河
 ---

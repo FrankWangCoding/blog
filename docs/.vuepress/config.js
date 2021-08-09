@@ -25,19 +25,12 @@ module.exports = {
           '/JSRedBook/UseJSInHtml.md',
           '/JSRedBook/BaseContent.md'
         ]
-      // }, {
-      //   title: '前端面试修炼手册',
-      //   collapsable: true, // 是否折叠
-      //   children: [
-      //     '/FrontendInterview/JavascriptBase.md'
-      //   ]
-      // }, {
-      //   title: '优秀博客记录',
-      //   collapsable: true, 
-      //   children: [
-      //     '/UsefulBlogs/UsefulBlogs.md'
-      //   ]
-      // }
+      }, {
+        title: 'React Hooks',
+        collapsable: true, // 是否折叠
+        children: [  // 具体文章内容的路径
+          '/ReactHooks/BaseHooks.md',
+        ]
       }
     ],
     markdown: {
