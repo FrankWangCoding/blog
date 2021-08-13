@@ -30,6 +30,7 @@ module.exports = {
         collapsable: true, // 是否折叠
         children: [  // 具体文章内容的路径
           '/ReactHooks/BaseHooks.md',
+          '/ReactHooks/ExtensionHooks.md'
         ]
       }
     ],
