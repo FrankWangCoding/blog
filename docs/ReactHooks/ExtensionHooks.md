@@ -42,3 +42,87 @@ function Counter() {
 ```
 
 在这里，我们把 count 这个 state ，作为一个依赖传递给 useCallback。这样，只有 count 发生变化的时候，才需要重新创建一个回调函数，这样就保证了组件不会创建重复的回调函数。而接收这个回调函数作为属性的组件，也不会频繁地需要重新渲染。
+
+## useMemo: 缓存计算的结果
+
+useMemo的api签名如下：
+
+```js
+
+useMemo(fn, deps)
+
+```
+
+这里的fn是产生数据所需的一个计算函数（可以类比vue中的computed）。通常来说fn会使用deps中声明的一个变量来生成一个结果，从而渲染出最终的UI。
+
+即：*如果某个数据是通过其它数据计算得到的，那么只有当用到的数据，也就是依赖的数据发生变化的时候，才应该需要重新计算*
+
+这里还是直接上代码：
+
+```js
+import React, { useState, useEffect } from "react";
+
+export default function SearchUserList() {
+  const [users, setUsers] = useState(null);
+  const [searchKey, setSearchKey] = useState("");
+
+  useEffect(() => {
+    const doFetch = async () => {
+      // 组件首次加载时发请求获取用户数据
+      const res = await fetch("https://reqres.in/api/users/");
+      setUsers(await res.json());
+    };
+    doFetch();
+  }, []);
+  let usersToShow = null;
+
+  if (users) {
+    // 无论组件为何刷新，这里一定会对数组做一次过滤的操作，会有重复的计算
+    // 因为没有之前的数据作比较，这里必然是会走的
+    usersToShow = users.data.filter((user) =>
+      user.first_name.includes(searchKey),
+    );
+  }
+
+  return (
+    <div>
+      <input
+        type="text"
+        value={searchKey}
+        onChange={(evt) => setSearchKey(evt.target.value)}
+      />
+      <ul>
+        {usersToShow &&
+          usersToShow.length > 0 &&
+          usersToShow.map((user) => {
+            return <li key={user.id}>{user.first_name}</li>;
+          })}
+      </ul>
+    </div>
+  );
+}
+```
+
+这里模拟了一个检索的功能，根据文本框的输入来搜索列表的信息。但是由于我们判断的只是user的列表是否为空，所以每次都会进行重复的计算，userToShow这个值都会重新被赋值，发生改变。然而我们并不想这样，我们期待的只是当user和searchKey发生改变的时候，才触发这个值的变化。不想要那么多无用的计算，浪费性能。所以这里就可以用到useMemo这个Hook来实现这个逻辑，将usersToShow可以改造成下面的方式：
+
+```js
+const userToShow = useMemo(() => {
+  if(!users) return null;
+  return users.data.filter((user) =>
+    user.first_name.includes(searchKey),
+  );
+},[users, searchKey]) // 当users和searchKey发生改变的时候，才进行重新计算，否则不会重新计算
+```
+
+useMemo还有一个重要的功能：**避免子组件的重复渲染。**还是拿上面的例子进行举例，如果页面的很多地方都要用到userToShow这个变量的话，每当userToShow变化，就会进行重新渲染。而当我们使用了useMemo，缓存了上一次的结果，避免了userToShow的不必要的变化，就可以避免很多不必要的组件刷新，从而提升了性能。
+
+如果我们这个时候把useMemo和useCallback结合来看，useMemo是可以实现useCallback的功能的。（即useMemo可以缓存一个函数，从而实现了useCallback的功能），拿下面的例子来进行举例：
+```js
+ const myEventHandler = useMemo(() => {
+   // 返回一个函数作为缓存结果
+   return () => {
+     // 在这里进行事件处理
+   }
+ }, [dep1, dep2]);
+ ```
+从本质上来说，useCallback和useMemo都做了同一件事：**建立了一个绑定某个结果到依赖数据的关系。只有当依赖变了，这个结果才需要被重新得到。**
