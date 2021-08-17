@@ -206,3 +206,99 @@ function TextInputWithFocusButton() {
 ```
 
 这段代码是 React 官方文档提供的一个例子，可以看到 ref 这个属性提供了获得 DOM 节点的能力，并利用 useRef 保存了这个节点的应用。这样的话，一旦 input 节点被渲染到界面上，那我们通过 inputEl.current 就能访问到真实的 DOM 节点的实例了。
+
+## useContext 定义全局状态
+
+用于跨层次或者同层级组件之间进行数据的共享，即全局状态管理。
+
+React提供一个Context机制，这样所有从这个组件衍生出来的组件，都能访问到这个Context，从而进行访问和修改这个Context。那么在函数组件里，我们就可以使用useContext这样一个Hook来管理Context。
+
+useContext函数原型如下：
+
+```js
+const value = useContext(MyContext); // MyContext为创建的Context，作为公用的上下文信息，在子组件中可以取得这个值
+```
+
+而我们创建Context的API是这样用的：
+
+```js
+const MyContext = React.createContext(initialValue); //这样我们创建了一个上下文信息。可以通过导入的方式来引用同一个信息，从而进行值的修改
+```
+
+创建出来的这个MyContext是有一个Provider属性的，可以有一个value值，应用到它所管控的所有上下文中，这样我们useContext获取到的，就是这个value的值。比如下面的这个例子。
+```js
+const themes = {
+  light: {
+    foreground: "#000000",
+    background: "#eeeeee"
+  },
+  dark: {
+    foreground: "#ffffff",
+    background: "#222222"
+  }
+};
+// 创建一个 Theme 的 Context，其实如果是多文件的情况，可以对它单独进行文件管理进行导出。默认的主题是浅色。
+const ThemeContext = React.createContext(themes.light);
+function App() {
+  // 整个应用使用 ThemeContext.Provider 作为根组件
+  return (
+    // 使用 themes.dark 作为当前 Context，它下面所管控的所有的组件如果用到了这个上下文，都会进行变化。
+    // 在这个例子里面，只有Toolbar
+    <ThemeContext.Provider value={themes.dark}>
+      <Toolbar />
+    </ThemeContext.Provider>
+  );
+}
+
+// 在 Toolbar 组件中使用一个会使用 Theme 的 Button
+function Toolbar(props) {
+  return (
+    <div>
+      <ThemedButton />
+    </div>
+  );
+}
+
+// 在 Theme Button 中使用 useContext 来获取当前的主题
+function ThemedButton() {
+  const theme = useContext(ThemeContext); // 在这里拿到了这个上下文，也就是我们在外面传递的深色。
+  return (
+    <button style={{
+      background: theme.background,
+      color: theme.foreground
+    }}>
+      I am styled by theme context!
+    </button>
+  );
+}
+```
+
+这里当Context发生变化的时候，它下面的数据都会自动刷新，重新进行渲染。这也是为什么React设计如此复杂的机制的问题，而不是简单的用一个全局变量的原因了。
+
+当我们想对主题色进行动态切换，如果我们清楚这个原理，那么思路也就变得比较简单，只需要动态改变创建的上下文的value值即可。那么下面的例子就是一个实现。
+```js
+// ...
+function App() {
+  // 使用 state 来保存 theme 从而可以动态修改
+  const [theme, setTheme] = useState("light");
+
+  // 切换 theme 的回调函数
+  const toggleTheme = useCallback(() => {
+    setTheme((theme) => (theme === "light" ? "dark" : "light"));
+  }, []);
+
+  return (
+    // 使用 theme state 作为当前 Context
+    <ThemeContext.Provider value={themes[theme]}>
+      <button onClick={toggleTheme}>Toggle Theme</button>
+      <Toolbar />
+    </ThemeContext.Provider>
+  );
+}
+```
+
+全局变量是一把双刃剑，它可以方便在组件间共享数据，但也有如下缺点：
+ - 会让调试变得困难，因为你很难跟踪某个 Context 的变化究竟是如何产生的。
+ - 让组件的复用变得困难，因为一个组件如果使用了某个 Context，它就必须确保被用到的地方一定有这个 Context 的 Provider 在其父组件的路径上。
+
+所以在 React 的开发中，除了像 Theme、Language 等一目了然的需要全局设置的变量外，我们很少会使用 Context 来做太多数据的共享。需要再三强调的是，Context 更多的是提供了一个强大的机制，**让 React 应用具备定义全局的响应式数据的能力。** 
