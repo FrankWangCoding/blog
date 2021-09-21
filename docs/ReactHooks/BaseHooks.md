@@ -1,5 +1,7 @@
 # Hooks简介和基本Hooks使用
 
+注：本章节所有内容几乎都是从极客时间专栏王沛老师的《React Hooks 核心原理与实战》整理而来，有一些个人的理解，不一定完全准确，仅作为一些内容的总结和整理而存在。
+
 ## Why we need Hooks?
 
 ### Class VS Function

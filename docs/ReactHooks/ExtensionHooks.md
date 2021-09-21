@@ -302,3 +302,102 @@ function App() {
  - 让组件的复用变得困难，因为一个组件如果使用了某个 Context，它就必须确保被用到的地方一定有这个 Context 的 Provider 在其父组件的路径上。
 
 所以在 React 的开发中，除了像 Theme、Language 等一目了然的需要全局设置的变量外，我们很少会使用 Context 来做太多数据的共享。需要再三强调的是，Context 更多的是提供了一个强大的机制，**让 React 应用具备定义全局的响应式数据的能力。** 
+
+## useReducer 以动作来控制状态
+
+注：这部分内容来自于React官方文档。
+
+useReducer是useState的替代方案。它比useState的好处在于，当state的逻辑较为复杂且包含多个子值或者下一个state依赖于之前的state时，它的适用度要比useState更广。它接收一个形如 (state, action) => newState 的 reducer，并返回当前的 state 以及与其配套的 dispatch 方法。
+useReducer也可以给触发深更新的组件做性能优化。（这个涉及到useContext和useReducer的联用，可以模拟Redux的效果）
+
+个人理解是有点类似于批量操作的意思，这个dispatch的方法，是可以进行批量的状态变更的。如果某个状态是依赖于其它状态的之前的状态，这个也是可以取到的。
+
+下面是官方文档的代码示例：
+```js
+const initialState = {count: 0};
+
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment':
+      return {count: state.count + 1};
+    case 'decrement':
+      return {count: state.count - 1};
+    default:
+      throw new Error();
+  }
+}
+
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState);
+  return (
+    <>
+      Count: {state.count}
+      <button onClick={() => dispatch({type: 'decrement'})}>-</button>
+      <button onClick={() => dispatch({type: 'increment'})}>+</button>
+    </>
+  );
+}
+```
+
+注：dispatch的标识是稳定的，可以在useEffect和useCallback等需要依赖的地方省略它。
+
+### 指定初始化state
+
+我们也可以使用useReducer来初始化state的值。初始化值的方式有两种。将初始 state 作为第二个参数传入 useReducer 是最简单的方法。
+
+```js
+ const [state, dispatch] = useReducer(
+    reducer,
+    {count: initialCount}
+  );
+```
+
+- 惰性初始化
+
+需要将初始化的函数作为第三个参数传入，作为一个初始化的状态创建函数。
+
+
+```js
+// 初始化的状态创建函数，当页面加载的时候，会从这里传入值
+function init(initialCount) {
+  return {count: initialCount};
+}
+
+// 管理了需要执行的动作，即action
+function reducer(state, action) {
+  switch (action.type) {
+    case 'increment':
+      return {count: state.count + 1};
+    case 'decrement':
+      return {count: state.count - 1};
+    case 'reset':
+      return init(action.payload);
+    default:
+      throw new Error();
+  }
+}
+
+function Counter({initialCount}) {
+  const [state, dispatch] = useReducer(reducer, initialCount, init);
+  // dispatch的原型就是这样的，传入一个action，action中包含的是动作的类型（type），和需要设置的值（payload）
+  // 下面的reset实际上调用了init方法，reducer和dispatch是关联的，reducer负责action的管理，dispatch负责action的发出
+  return (
+    <>
+      Count: {state.count}
+      <button
+        onClick={() => dispatch({type: 'reset', payload: initialCount})}>
+        Reset
+      </button>
+      <button onClick={() => dispatch({type: 'decrement'})}>-</button>
+      <button onClick={() => dispatch({type: 'increment'})}>+</button>
+    </>
+  );
+}
+```
+
+- 跳过dispatch
+
+如果 Reducer Hook 的返回值与当前 state 相同，React 将跳过子组件的渲染及副作用的执行。（React 使用 Object.is 比较算法 来比较 state。）
+
+需要注意的是，React 可能仍需要在跳过渲染前再次渲染该组件。不过由于 React 不会对组件树的“深层”节点进行不必要的渲染，所以大可不必担心。
+
