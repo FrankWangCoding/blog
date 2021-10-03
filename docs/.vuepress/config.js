@@ -32,6 +32,12 @@ module.exports = {
           '/ReactHooks/BaseHooks.md',
           '/ReactHooks/ExtensionHooks.md'
         ]
+      },{
+        title: '一些杂七杂八的个人总结',
+        collapsable: true, // 是否折叠
+        children: [  // 具体文章内容的路径
+          '/Origin/RouterInProject.md'
+        ]
       }
     ],
     markdown: {
