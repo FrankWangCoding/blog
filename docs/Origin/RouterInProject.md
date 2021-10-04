@@ -18,20 +18,44 @@ WithRouter是一个高阶组件，它会把类组件包装成一个高阶组件�
 
 1.首先，我们要把withRouter和RouterComponentProps导入进来。
 
-![引入withRouter](./img/importWithRouter.png)
+```ts
+import { RouteComponentProps, withRouter } from 'react-router-dom';
+```
 
 2.其次，我们要改变类组件的声明。
 
-![变更类组件声明](./img/classDeclare.png)
+```ts
+
+interface IApplicationRecordProps extends RouteComponentProps<void> {
+  applicationRecordStore: ApplicationRecordStore;
+}
+
+@observer
+class ListTable extends React.Component<IApplicationRecordProps, IDetailTableStates> {
+  // ....里面是类的方法
+}
+```
+
 
 3.再次，**是我们的核心**。我们要使用这个来进行路由跳转方式的替换。
 
-<img src="./img/beforeUseRouter.png"/>
-<img src="./img/afterUseRouter.png"/>
+变更前：
+```ts
+window.location.href = `/admin/merchant#/brand-info-edit?brandCode=${brandCode}&applyType=UPDATE`;
+```
+
+变更后：
+```ts
+const { history } = this.props;
+history.push(`/brand-info-edit?brandCode=${brandCode}&applyType=UPDATE`);
+```
+
 
 4.最后，使用WithRouter形成一个高阶组件
 
-<img src="./img/exportClass.png"/>
+```ts
+export default withRouter(ListTable);
+```
 
 注：withRouter的使用范围有两个限制。第一个是类组件，只有在类组件中才能使用。第二个是不直接与主页面的路由相连，才需要用withRouter高阶组件。如果当前的组件有Router，则直接使用Router即可，不需要用WithRouter添加路由对象进去。
 
@@ -42,24 +66,71 @@ React在16.8版本后推出了React Hooks，所以我们又多了一种写组件
 下面我们来看看useHistory在函数组件中是怎么使用的。
 
 1.首先我们引入useHistory
+```ts
+import { useHistory } from 'react-router-dom'
+```
 
-<img src="./img/importUseHistory.png"/>
+2.我们可以在函数组件声明一个对象，用来获取当前的路由。
 
-2.我们可以在函数组件声明一个对象，用来获取当前的路由。我们可以看一下这个对象里面有什么。
+```ts
+// 当前路由，执行这个方法就得到了一个当前路由的实例
+const history = useHistory();
+```
+然后，我们可以看一下这个对象里面有什么。
 
-<img src="./img/declareHistory.png"/>
 <img src="./img/historyContent.png"/>
 
 3.获取到这个路由对象我们就可以全局来进行使用。如下是两个使用示例，也可以结合hooks来进行使用。
 
-<img src="./img/useHistoryOptionFirst.png">
-<img src="./img/useHistoryOptionSecond.png">
+```ts
+/**
+  * 取消操作
+  */
+const handleCancel = () => {
+  history.push('/merchant/freeShipping/list');
+};
+
+/** 保存成功操作 **/
+const saveSuccess = () => {
+  // 前面还有部分业务代码，不主要，省略 //
+  try {
+    saveFlag.current = true;
+    await savePolicies(saveRuleObjList);
+    Toast.success('保存成功', 2000);
+    setTimeout(() => {
+      history.push('/merchant/freeShipping/list');
+    }, 2000);
+  } catch (err) {
+    const error = err as AxiosError;
+    Toast.error(error?.response?.data?.message || '保存失败', 2000);
+    saveFlag.current = false;
+  }
+}
+```
 
 ## 从项目整体切入，看看我们的Router是怎么运作的
 
-从我们的项目来看，都用的是哈希路由（即HashRouter)。比如差不多是这样的一个结构。
+从我们的项目来看，都用的是哈希路由（即HashRouter)。比如差不多是这样的一个结构。这个是我们项目中的app.tsx文件。
 
-<img src="./img/appIntrance.png">
+```ts
+import { Provider } from 'mobx-react';
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { HashRouter } from 'react-router-dom';
+import { renderRoutes } from 'react-router-config';
+import '@casstime/bricks/lib/styles/bricks.scss';
+
+import routes from './config/route';
+import stores from './config/stores';
+import './styles/index.scss';
+
+ReactDOM.render(
+  <HashRouter>
+    <Provider {...stores}>{renderRoutes(routes)}</Provider>
+  </HashRouter>,
+  document.getElementById('root'),
+);
+```
 
 这里我们不免对HashRouter的内部构造有一些兴趣，于是我们打开它的内部构造，结果发现了更玄妙的东西。这里就不得不提到BrowserRouter和HashRouter，react-router对它们的不同的处理方式。
 
@@ -98,11 +169,12 @@ class HashRouter extends React.Component {
 export default HashRouter;
 ```
 
-Router源码
+Router源码：
 ```js
 import React from "react";
 
-// 这两个只是提供一个普通的上下文，用来创建一个Context而已，都调用了createNamedContext这个方法。用于向下传递共享的属性
+// 这两个只是提供一个普通的上下文，用来创建一个Context而已
+// 都调用了createNamedContext这个方法。用于向下传递共享的属性
 import HistoryContext from "./HistoryContext.js";
 import RouterContext from "./RouterContext.js";
 
@@ -126,7 +198,7 @@ class Router extends React.Component {
     // on the initial render. If there are, they will replace/push when
     // they mount and since cDM fires in children before parents, we may
     // get a new location before the <Router> is mounted.
-    // 因为子组件会比父组件更早渲染完成, 以及<Redirect>的存在, 若是在<Router>的
+    // 这个是一个比较hack的地方。因为子组件会比父组件更早渲染完成, 以及<Redirect>的存在, 若是在<Router>的
     // componentDidMount生命周期中对history.location进行监听, 则有可能在监听
     // 事件注册之前, history.location已经由于<Redirect>发生了多次改变, 因此我们
     // 需要在<Router>的constructor中就注册监听事件
@@ -156,10 +228,9 @@ class Router extends React.Component {
     if (this.unlisten) {
       // 其实这里是我觉得很精髓的一个地方
       // 这个源码考虑到了两种情况
-      // 可能路由卸载加载成功了，然后location也成功的变化了，那就是走上面的this._isMounted为true的情况
-      // 也有可能是还没有加载的时候（比如第一次），然后这个路由就会被记录，然后这个时候这个记录就存在了
-      // 然后当这个记录存在，走mounted的时候，就可以成功被设置
-      // 有点相辅相成的意思
+      // 有可能是非首次加载的情况，即已经加载过了，就直接变化location就可以
+      // 也有可能是首次加载的情况，然后这个路由就会被记录
+      // 然后当组件加载完毕的时候，会有一个判断，这个时候location就可以成功被设置
       this.unlisten();
       this._isMounted = false;
       this._pendingLocation = null;
@@ -168,12 +239,13 @@ class Router extends React.Component {
 
   render() {
     return (
+      // 主要的功能就是为子组件提供数据支持，以便于子组件进行获取、更改、跳转。
       <RouterContext.Provider
         value={{
-          history: this.props.history,
-          location: this.state.location,
-          match: Router.computeRootMatch(this.state.location.pathname),
-          staticContext: this.props.staticContext
+          history: this.props.history, // 即外部传入的history属性
+          location: this.state.location, // 当前被设置的location
+          match: Router.computeRootMatch(this.state.location.pathname), // path params url isExact四个属性
+          staticContext: this.props.staticContext // 如果是BrowserRouter和HashRouter其实都是null
         }}
       >
         <HistoryContext.Provider
@@ -187,3 +259,302 @@ class Router extends React.Component {
 
 export default Router;
 ```
+
+createBrowserHistory和createHashHistory这里我们只是看看它的返回值有什么内容，看一下它的类型。不作为重点进行讲述。有兴趣的可以看一下源码（ps.因为源码实在太长了，我感觉需要单列一篇单独研究）
+
+createBrowserHistory和createHashHistory中返回的内容基本是一致的，它们的不同区别主要是对路径的处理上。具体参阅源码，这里不进行赘述。（后面等我搞明白了，补一篇叙述吧）
+
+我们可以看到熟悉的go，push，以及刚才我们用到的listen等方法都能看到，都是这个对象暴露出来的。
+```ts
+  // 这个history就是它返回的值
+  let history: HashHistory = {
+    get action() {
+      return action;
+    },
+    get location() {
+      return location;
+    },
+    createHref,
+    push,
+    replace,
+    go,
+    back() {
+      go(-1);
+    },
+    forward() {
+      go(1);
+    },
+    listen(listener) {
+      return listeners.push(listener);
+    },
+    block(blocker) {
+      let unblock = blockers.push(blocker);
+
+      if (blockers.length === 1) {
+        window.addEventListener(BeforeUnloadEventType, promptBeforeUnload);
+      }
+
+      return function() {
+        unblock();
+
+        // Remove the beforeunload listener so the document may
+        // still be salvageable in the pagehide event.
+        // See https://html.spec.whatwg.org/#unloading-documents
+        if (!blockers.length) {
+          window.removeEventListener(BeforeUnloadEventType, promptBeforeUnload);
+        }
+      };
+    }
+  };
+```
+
+再次回到我们的app.tsx文件，我们可以看到有一个renderRoutes。那这个又是咋回事呢？实际上它只不过是把我们的路由列表map了一下，然后生成若干个Route组件而已。
+
+```ts
+import React from "react";
+import { Switch, Route } from "react-router";
+
+// 这里的routes就是我们经常能看到的router.ts文件暴露的内容，也是我们路由的维护项
+// 我们很熟悉的path、exact、component属性都是需要传入这里
+// 然后进行渲染得到的路由，Switch组件是负责路由的匹配
+// 判断当前的路径符合哪个，就显示哪个
+function renderRoutes(routes, extraProps = {}, switchProps = {}) {
+  return routes ? (
+    <Switch {...switchProps}>
+      {routes.map((route, i) => (
+        <Route
+          key={route.key || i}
+          path={route.path}
+          exact={route.exact}
+          strict={route.strict}
+          render={props =>
+            route.render ? (
+              route.render({ ...props, ...extraProps, route: route })
+            ) : (
+              <route.component {...props} {...extraProps} route={route} />
+            )
+          }
+        />
+      ))}
+    </Switch>
+  ) : null;
+}
+
+export default renderRoutes;
+```
+详细的看一下Route组件里面都有啥。老样子，我们依旧只看主干代码，对警告等无关紧要的内容忽略掉。
+```js
+  //switch核心模块
+  let match, child;
+  React.Children.forEach(children, element => {
+    if (match == null && React.isValidElement(element)) {
+      const {
+        path: pathProp,
+        exact,
+        strict,
+        sensitive,
+        from
+      } = element.props;
+      const path = pathProp || from;
+
+      child = element;
+      match = matchPath(
+        location.pathname,
+        { path, exact, strict, sensitive },
+        route.match
+      );
+    }
+  });
+
+  return match
+    ? React.cloneElement(child, { location, computedMatch: match })
+    : null;
+```
+
+```js
+// Route组件
+class Route extends React.Component {
+  render() {
+    return (
+      // 这里声明了一个消费者，那么我们就可以拿到ReactContext.Provider里面的值
+      // 即history，location，match，staticContext属性。
+      <RouterContext.Consumer>
+        {context => {
+          // 在Switch下面的话，location会传入。如果没有location，则会用Provider提供的location
+          const location = this.props.location || context.location; 
+          // 如果是在Switch下面，就会传入这个属性。
+          // 如果找不到这个属性，那我就找path，重新计算一遍匹配的路径（其实computedMatch也算的是这玩意儿）
+          // 如果再找不到，那我就去取上下文的match
+          const match = this.props.computedMatch 
+            ? this.props.computedMatch // <Switch> already computed the match for us
+            : this.props.path
+            ? matchPath(location.pathname, this.props)
+            : context.match;
+          // 组合属性，准备传给子组件
+          const props = { ...context, location, match };
+
+          // 解构出来子节点、组件、render方法
+          let { children, component, render } = this.props;
+
+          // 对子节点为空的处理
+          if (Array.isArray(children) && isEmptyChildren(children)) {
+            children = null;
+          }
+          // 一系列的判断和渲染
+          return (
+            <RouterContext.Provider value={props}>
+              {props.match
+                ? children
+                  ? typeof children === "function"
+                    ? children(props)
+                    : children
+                  : component
+                  ? React.createElement(component, props)
+                  : render
+                  ? render(props)
+                  : null
+                : typeof children === "function"
+                ? children(props)
+                : null}
+            </RouterContext.Provider>
+          );
+        }}
+      </RouterContext.Consumer>
+    );
+  }
+}
+```
+
+```js
+function matchPath(pathname, options = {}) {
+  // 当配置项为数组或者字符串的时候，直接给一个path属性，值为配置项本身，并保存
+  if (typeof options === "string" || Array.isArray(options)) {
+    options = { path: options };
+  }
+  // 解构出来path、exact、strict、sensitive的属性，这些如果有配置就解构出来，没有就给默认值
+  const { path, exact = false, strict = false, sensitive = false } = options;
+  // 这一步操作是把路径变成统一的数组
+  const paths = [].concat(path);
+
+  return paths.reduce((matched, path) => {
+    // 如果没有路径，且不为空字符串那就返回null
+    if (!path && path !== "") return null;
+    // 如果有匹配的，那我就不找了，返回即可
+    if (matched) return matched;
+    // 解构出来正则表达式和keys的值，下面有用
+    const { regexp, keys } = compilePath(path, {
+      end: exact,
+      strict,
+      sensitive
+    });
+    // 通过路径去匹配正则表达式
+    const match = regexp.exec(pathname);
+    // 如果没有匹配返回null
+    if (!match) return null;
+    // 如果匹配了，则解构出来url和其它的值
+    const [url, ...values] = match;
+    // 是否精准匹配
+    const isExact = pathname === url;
+    // 如果有精准匹配的条件，但是实际上没有精准匹配，则返回null
+    if (exact && !isExact) return null;
+    // 如果上述的校验都通过，则返回最终结果
+    return {
+      path, // the path used to match
+      url: path === "/" && url === "" ? "/" : url, // the matched portion of the URL
+      isExact, // whether or not we matched exactly
+      params: keys.reduce((memo, key, index) => {
+        memo[key.name] = values[index];
+        return memo;
+      }, {})
+    };
+  }, null);
+}
+```
+回到我们的下一个正题，需要看一下WithRouter的代码，看它具体做了什么工作，为啥就把不直接与路由相连的组件，就可以使用路由的方法了呢？
+
+如果我们弄清楚上面的代码的话，那这个看起来就变得非常非常简单了。看了下面的代码，我们就可以明白为啥能获取到Router提供的属性了。
+
+```js
+import React from "react";
+import hoistStatics from "hoist-non-react-statics";
+import RouterContext from "./RouterContext.js";
+
+/**
+ * A public higher-order component to access the imperative API
+ */
+function withRouter(Component) {
+  const displayName = `withRouter(${Component.displayName || Component.name})`;
+  const C = props => {
+    // 解构出一个ref，用于单独去引用这个dom，具体原因不太明确
+    const { wrappedComponentRef, ...remainingProps } = props;
+    // 这里还是利用我们上面Router中提供的上下文，把属性传递进来，即history，location，match，staticContext属性。
+    return (
+      <RouterContext.Consumer>
+        {context => {
+          return (
+            <Component
+              {...remainingProps}
+              {...context} 
+              ref={wrappedComponentRef}
+            />
+          );
+        }}
+      </RouterContext.Consumer>
+    );
+  };
+
+  C.displayName = displayName;
+  C.WrappedComponent = Component;
+  // 使用hoistStatics这个库是想把高阶组件和静态方法聚合起来
+  return hoistStatics(C, Component);
+}
+
+export default withRouter;
+```
+
+下面我们再看看Hooks给我们提供的四个Router Hooks。其实他们每个方法里面都有一个版本的警告提示，如果判断组件不是函数的时候，会给出警告提示。不过这里为了简单，我把他们都删去了
+```js
+import React from "react";
+import RouterContext from "./RouterContext.js";
+import HistoryContext from "./HistoryContext.js";
+import matchPath from "./matchPath.js";
+
+const useContext = React.useContext;
+
+export function useHistory() {
+  // 这里的HistoryContext，我们上面其实见过，这个上下文中，只有history对象的值，包含了若干属性。
+  // 这个是我们调用useHistory钩子能够拿到history对象值的原因。
+  return useContext(HistoryContext);
+}
+
+export function useLocation() {
+  // 同理，这里的RouterContext，我们也见过，包含history，location，match，staticContext属性
+  // 我们拿到了这里的location属性
+  return useContext(RouterContext).location;
+}
+
+export function useParams() {
+  // 同理，这里的RouterContext，我们也见过，包含history，location，match，staticContext属性
+  // 这里我们拿到了match属性
+  const match = useContext(RouterContext).match;
+  // 如果有match属性，则返回match属性里的参数，即动态路由里的值
+  return match ? match.params : {};
+}
+
+export function useRouteMatch(path) {
+  const location = useLocation();
+  const match = useContext(RouterContext).match;
+  return path ? matchPath(location.pathname, path) : match;
+}
+```
+
+# 参考资料
+1.[React-Router](https://github.com/remix-run/react-router)(https://github.com/remix-run/react-router)
+
+2.[React Router源码浅析](https://zhuanlan.zhihu.com/p/106042913)(https://zhuanlan.zhihu.com/p/106042913)
+
+3.[面试官，别再问我React-Router了！每一行源码我都看过了！](https://zhuanlan.zhihu.com/p/355075393)(https://zhuanlan.zhihu.com/p/355075393)
+
+4.[手写React-Router源码，深入理解其原理](https://segmentfault.com/a/1190000023560665?sort=votes)(https://segmentfault.com/a/1190000023560665?sort=votes)
+
+5.[react-router-config使用与路由鉴权](https://juejin.cn/post/6844904056805130254)(https://juejin.cn/post/6844904056805130254)
