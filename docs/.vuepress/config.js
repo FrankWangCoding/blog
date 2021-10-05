@@ -30,7 +30,8 @@ module.exports = {
         collapsable: true, // 是否折叠
         children: [  // 具体文章内容的路径
           '/ReactHooks/BaseHooks.md',
-          '/ReactHooks/ExtensionHooks.md'
+          '/ReactHooks/ExtensionHooks.md',
+          '/ReactHooks/LifeCycleAndFunction.md'
         ]
       },{
         title: '一些杂七杂八的个人总结',
