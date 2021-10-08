@@ -12,7 +12,7 @@
 
 - 如果是类组件，使用WithRouter
 
-WithRouter是一个高阶组件，它会把类组件包装成一个高阶组件，在原来的基础上添加react-router的match、history、location三个对象到我们的类组件中。这样对于我们层级较深的，没有直接和外层路由相连的组件，我们也可以直接对其进行路由操作。
+withRouter是一个高阶组件，它会把类组件包装成一个高阶组件，在原来的基础上添加react-router的match、history、location三个对象（其实还有staticContext，不过不常用）到我们的类组件中。这样对于我们层级较深的，没有直接和外层路由相连的组件，我们也可以直接对其进行路由操作。
 
 下面我们举例子来看这个的用法：
 
@@ -22,7 +22,7 @@ WithRouter是一个高阶组件，它会把类组件包装成一个高阶组件�
 import { RouteComponentProps, withRouter } from 'react-router-dom';
 ```
 
-2.其次，我们要改变类组件的声明。
+2.其次，我们要改变类组件的声明。这样ts的类型检测才不会报错，否则后面我们用到props属性的时候，是拿不到history对象的。
 
 ```ts
 
@@ -30,12 +30,12 @@ interface IApplicationRecordProps extends RouteComponentProps<void> {
   applicationRecordStore: ApplicationRecordStore;
 }
 
+// 这里我们不能直接export出去，因为我们还需要用withRouter进行高阶组件的封装。
 @observer
 class ListTable extends React.Component<IApplicationRecordProps, IDetailTableStates> {
   // ....里面是类的方法
 }
 ```
-
 
 3.再次，**是我们的核心**。我们要使用这个来进行路由跳转方式的替换。
 
@@ -50,22 +50,26 @@ const { history } = this.props;
 history.push(`/brand-info-edit?brandCode=${brandCode}&applyType=UPDATE`);
 ```
 
-
-4.最后，使用WithRouter形成一个高阶组件
+4.最后，使用WithRouter形成一个高阶组件。
 
 ```ts
 export default withRouter(ListTable);
 ```
 
-注：withRouter的使用范围有两个限制。第一个是类组件，只有在类组件中才能使用。第二个是不直接与主页面的路由相连，才需要用withRouter高阶组件。如果当前的组件有Router，则直接使用Router即可，不需要用WithRouter添加路由对象进去。
+注：withRouter的使用范围有两个限制。
+
+​       第一个是类组件，只有在类组件中才能使用。
+
+​       第二个是不直接与主页面的路由相连，才需要用withRouter高阶组件。如果当前的组件有Router，则直接使用Router即可，不需要用withRouter添加路由对象进去。
 
 - 如果是函数组件，使用useHistory
 
-React在16.8版本后推出了React Hooks，所以我们又多了一种写组件的方法。与之对应，我们也要对路由跳转的方法进行变更，所以useHistory横空出世。
+React在16.8版本后推出了React Hooks，所以我们又多了一种写组件的方法，即Hooks组件。与之对应，我们也要对路由跳转的方法进行变更，所以useHistory横空出世。（注意：只有16.8之后的版本，且组件为Hooks组件才可以使用这个方法）
 
 下面我们来看看useHistory在函数组件中是怎么使用的。
 
-1.首先我们引入useHistory
+1.首先我们引入useHistory。
+
 ```ts
 import { useHistory } from 'react-router-dom'
 ```
@@ -108,9 +112,235 @@ const saveSuccess = () => {
 }
 ```
 
+- 如果跳转路由方法写到store里面，我们需要想办法放到组件执行
+
+我们的store是一个类，它并没有路由的这些方法，而路由的方法都是需要借助React组件来执行的，并没有直接的关联。所以对于这个问题，我有以下的两个思路来解决这个问题。
+
+1. 在某个合适的时机传入跳转路由的方法，利用回调函数的机制来进行执行。
+
+   比如这里是我们项目中的一段代码，拿它来举例。
+
+   ```tsx
+   /** ContactInformation.tsx **/
+   import { withRouter, RouteComponentProps } from 'react-router-dom';
+   interface IContractorInformationProps extends RouteComponentProps<void> {
+     contractManagePageSore: ContractManagePageSore; // contractManagePageSore
+   }
+   
+   @observer
+   class ContractorInformation extends React.Component<IContractorInformationProps, {}> {
+     componentDidMount() {
+       const { contractManagePageSore } = this.props;
+       contractManagePageSore.getSigningUser();
+     }
+       
+     /**
+      * 异步提交页面数据
+      */
+     async submitContractManage() {
+       const { contractManagePageSore } = this.props;
+       /** 保存成功时的回调函数，设置并传入到store里面去 */
+       const submitSuccessCallback = () => {
+         history.push('/contract-manage');
+       };
+       contractManagePageSore.setSubmitSuccessCallback(submitSuccessCallback);
+       /** 上面一段为新增代码 **/ 
+       contractManagePageSore.submitConfig();
+     }
+       
+     /** 渲染 **/
+     render() {
+         return  
+         	<SubmitConfigConfirm
+           	closeModal={() => contractManagePageSore.toggleConfirmLayer()}
+           	store={contractManagePageSore}
+           	submit={() => this.submitContractManage()}
+         	/>
+     }
+   }
+   export default withRouter(ContractorInformation)
+   /** contactManagePageSore.ts **/ 
+   class ContractManagePageSore {
+     /** 保存成功时的回调函数 */
+     @observable submitSuccessCallback: (() => void) | null = null;
+   
+     /** 设置保存成功时的回调函数 */
+     @action setSubmitSuccessCallback = (fn: () => void) => {
+       this.submitSuccessCallback = fn;
+     };
+     /** 上面两个状态也是新增的 **/
+     // 合同发布提交
+     @action
+     async submitConfig() {
+       if (this.operationing) {
+         this.operationing = false;
+         try {
+           const flag = await contractPublish(this.publishSigningParams);
+           if (flag) {
+             this.operationing = true;
+             Toast.success('发布成功', 2000);
+             // 这里从直接的跳转，变成了调用回调函数。
+             if (submitSuccessCallback) {
+                 setTimeout(() => {
+                   // window.location.href = '/admin/merchant#/contract-manage';
+                   submitSuccessCallback();
+                 }, 2000);
+             }
+           } else {
+             Toast.error('发布失败！', 2000);
+           }
+         } catch (err) {
+           if (err.response.status === 409) {
+             Toast.error(err.response.data, 2000);
+           } else if (err.response.status === 504) {
+             Toast.error('系统异常，请刷新重试~', 2000);
+           } else {
+             Toast.error('发布失败！', 2000);
+           }
+         }
+       }
+     }
+   }
+   ```
+
+2. 我们可以将处理的方法或者方法处理的值，进行拆解或者移动到组件中来执行。这种适用于逻辑不复杂，需要整理逻辑代码不多的情况。
+
+   其实在store中进行数据的组装是可以的，但是如果涉及到路由跳转的，尽量还是在组件上写方法进行组装数据。所以这种方式可能改动量就会有点大，需要进行数据的判断。但是也给我们提了个醒，如果不是只是单纯组装数据的工具类方法，需要对方法进行更细力度的拆分。将交互等内容，尽量放在组件的方法里面去完成。
+
+   结合具体示例来看，我们要如何对其进行改造。下面的例子只是最简单的一种情况，可以参考改造难度进行发挥。
+   
+   旧代码：
+   
+  ```tsx
+    /** Operation.tsx**/
+    interface IMarketingDetailStore extends RouteComponentProps<void> {
+      marketingDetailStore: MarketingDetailStore;
+    }
+    class Operation extends React.Component<IMarketingDetailStore, {}> {
+      render() {
+        const { marketingDetailStore, history } = this.props;
+        /** 取消方法 */
+        const cancel = () => {
+          history.push('/marketing-sharing');
+        };
+        return (
+          <div className={marketingDetailStyle.operationMargin}>
+            <Button
+              className={marketingDetailStyle.operationSave}
+              onClick={marketingDetailStore.saveSetting}
+            >
+              保存
+            </Button>
+            <Button outline onClick={cancel}>
+              取消
+            </Button>
+          </div>
+        );
+      }
+    }
+    export default withRouter(Operation);
+    
+    /** MarketingDetailStore.ts **/
+    class MarketingDetailStore {
+      /**
+        * 保存配置
+      */
+      saveSetting = async () => {
+        if (!this.startTime || !this.endTime) {
+          Toast.error('请设置活动时间', 2000);
+          return;
+        }
+        const param: IProductShareRequest = {
+          id: this.shareId,
+          shareStartTime: this.startTime.valueOf(),
+          shareEndTime: this.endTime.valueOf(),
+          remark: this.remark || undefined,
+        };
+        try {
+          const result = await saveDetailInfo(param);
+          if (result) {
+            Toast.success('保存成功', 2000);
+            setTimeout(() => {
+              window.location.href = '/admin/merchant#/marketing-sharing';
+            }, 2000);
+          }
+        } catch (e) {
+          Toast.error('保存失败', 2000);
+        }
+      };
+    }
+  ```
+​       新代码：
+
+  ```tsx
+    /** Operation.tsx**/
+    interface IMarketingDetailStore extends RouteComponentProps<void> {
+      marketingDetailStore: MarketingDetailStore;
+    }
+    class Operation extends React.Component<IMarketingDetailStore, {}> {
+    render() {
+      const { marketingDetailStore, history } = this.props;
+      /** 取消方法 */
+      const cancel = () => {
+        history.push('/marketing-sharing');
+      };
+      /** 将store中的方法提出来到这里 **/
+      const save = async () => {
+        const { startTime, endTime, getParam } = marketingDetailStore;
+        if (!startTime || !endTime) {
+          Toast.error('请设置活动时间', 2000);
+          return;
+        }
+        const param = getParam();
+        try {
+          const result = await saveDetailInfo(param);
+          if (result) {
+            Toast.success('保存成功', 2000);
+            setTimeout(() => {
+              window.location.href = '/admin/merchant#/marketing-sharing';
+            }, 2000);
+          }
+        } catch (e) {
+          Toast.error('保存失败', 2000);
+        }
+      };
+      return (
+        <div className={marketingDetailStyle.operationMargin}>
+          <Button
+            className={marketingDetailStyle.operationSave}
+            onClick={save}
+          >
+            保存
+          </Button>
+          <Button outline onClick={cancel}>
+            取消
+          </Button>
+        </div>
+      );
+      }
+    }
+    export default withRouter(Operation);
+
+        
+    /** MarketingDetailStore.ts **/
+    class MarketingDetailStore {
+      /** 获取查询参数 * */
+      getParam = () => {
+        return {
+          id: this.shareId,
+          shareStartTime: this.startTime?.valueOf() || 0,
+          shareEndTime: this.endTime?.valueOf() || 0,
+          remark: this.remark || undefined,
+        };
+      };
+    }
+  ```
+
+   
+
 ## 从项目整体切入，看看我们的Router是怎么运作的
 
-从我们的项目来看，都用的是哈希路由（即HashRouter)。比如差不多是这样的一个结构。这个是我们项目中的app.tsx文件。
+从我们的项目来看，都用的是哈希路由（即HashRouter)。我们的脚手架创建出来的入口文件app.tsx，差不多是这样的一个结构。
 
 ```ts
 import { Provider } from 'mobx-react';
@@ -132,10 +362,14 @@ ReactDOM.render(
 );
 ```
 
-这里我们不免对HashRouter的内部构造有一些兴趣，于是我们打开它的内部构造，结果发现了更玄妙的东西。这里就不得不提到BrowserRouter和HashRouter，react-router对它们的不同的处理方式。
+这里我们不免对HashRouter的内部构造有一些兴趣，于是我们打开它的内部构造，结果发现了更玄妙的东西。
 
-以下代码只保留了主干部分。这里我们可以看到它们的代码结构几乎一模一样。都使用了history这个库，通过传入的history方法来判断是BrowserRouter还是HistoryRouter。那么我们分两个部分展开去讲。分别分析Router组件和简单看一下createBrowserHistory和createHashHistory给我们带来了什么特性。
+我们所知道的是，React提供了两种路由的方式，BrowserRouter和HashRouter（表面上看是带哈希符号即#和不带哈希符号的区别），react-router对它们处理方式也会有所不同。
+
+以下代码只保留了主干部分。这里我们可以看到它们的代码结构几乎一模一样，区别只在于传入的history属性的方法不一样而已。都使用了history这个库，通过传入的history方法来判断是BrowserRouter还是HistoryRouter。那么我们分两个部分展开去讲。分别分析Router组件和简单看一下createBrowserHistory和createHashHistory给我们带来了什么特性。
+
 BrowserRouter源码：
+
 ```js
 import React from "react";
 import { Router } from "react-router";
@@ -179,7 +413,7 @@ import HistoryContext from "./HistoryContext.js";
 import RouterContext from "./RouterContext.js";
 
 /**
- * Router就是记录路由状态的context
+ * Router就是记录路由状态的context，它是一个组件，用于给它下面的子节点提供数据支撑
  */
 class Router extends React.Component {
   static computeRootMatch(pathname) {
@@ -206,11 +440,14 @@ class Router extends React.Component {
     this._pendingLocation = null; // 是否是在读取中的路由
 
     if (!props.staticContext) { // 这里其实BrowserRouter和HashRouter都走这里，它们都不是静态上下文
-      this.unlisten = props.history.listen(location => { // 这里根据传入的history不同，调用他们的listen方法
-        if (this._isMounted) { // 读取状态完毕后，就设置跳转路由
+      // 这里其实注册了一个函数，用于全局监听路由的变化（注册即监听）。
+      // 这个是history库提供的机制。可以理解为window.addEventListener。执行这个函数相当于取消监听。
+      // You can make use of history.listen() function when trying to detect the route change.
+      this.unlisten = props.history.listen(location => {
+        if (this._isMounted) { // 如果已经加载过路由了，那我就直接跳转位置就好了
           this.setState({ location });
         } else {
-          this._pendingLocation = location; // 否则就暂时搁置，存一下
+          this._pendingLocation = location; // 如果是初次加载，则需要暂存一下存储的路由位置，以便于组件加载的时候，能获取到这个地址
         }
       });
     }
@@ -218,19 +455,15 @@ class Router extends React.Component {
 
   componentDidMount() {
     this._isMounted = true; // 加载完成的时候，就设置已经加载状态为true
-
-    if (this._pendingLocation) { // 如果有暂存的位置，就设置这个路由位置。
+    if (this._pendingLocation) { // 这个就是pendingLocation的意义，如果组件没有加载成功的时候，它能从这里面获取值，去设置
       this.setState({ location: this._pendingLocation });
     }
   }
 
   componentWillUnmount() {
-    if (this.unlisten) {
-      // 其实这里是我觉得很精髓的一个地方
-      // 这个源码考虑到了两种情况
-      // 有可能是非首次加载的情况，即已经加载过了，就直接变化location就可以
-      // 也有可能是首次加载的情况，然后这个路由就会被记录
-      // 然后当组件加载完毕的时候，会有一个判断，这个时候location就可以成功被设置
+    // 如果unlisten存在，就执行unlisten()，取消了对路由的监听。并设置加载和pendingLocation为初始化状态
+    // You can unlisten by calling (`this.unlisten()`).
+    if (this.unlisten) { 
       this.unlisten();
       this._isMounted = false;
       this._pendingLocation = null;
@@ -558,3 +791,5 @@ export function useRouteMatch(path) {
 4.[手写React-Router源码，深入理解其原理](https://segmentfault.com/a/1190000023560665?sort=votes)(https://segmentfault.com/a/1190000023560665?sort=votes)
 
 5.[react-router-config使用与路由鉴权](https://juejin.cn/post/6844904056805130254)(https://juejin.cn/post/6844904056805130254)
+
+6.[StackOverFlow-history库中listen和unlisten的解答](https://stackoverflow.com/questions/45373742/detect-route-change-with-react-router)(https://stackoverflow.com/questions/45373742/detect-route-change-with-react-router)
