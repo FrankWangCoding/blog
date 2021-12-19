@@ -7,6 +7,7 @@ module.exports = {
   ],
   themeConfig: {
     lastUpdated: '最后更新时间',
+    sidebarDepth: 3,
     nav: [
       {
         text: '首页',
@@ -33,7 +34,13 @@ module.exports = {
           '/ReactHooks/ExtensionHooks.md',
           '/ReactHooks/LifeCycleAndFunction.md'
         ]
-      },
+      }, {
+        title: '个人的零零碎碎的总结',
+        collapsable: true,
+        children: [
+          '/PersonnelStudy/RouterInProject.md'
+        ]
+      }
     ],
     markdown: {
       // 显示代码块行号
