@@ -38,7 +38,13 @@ module.exports = {
         title: '个人的零零碎碎的总结',
         collapsable: true,
         children: [
-          '/PersonnelStudy/RouterInProject.md'
+          '/personnelStudy/RouterInProject.md'
+        ]
+      },{
+        title: '面试题整理',
+        collapsable: true,
+        children: [
+          '/interview/js/handwritting.md'
         ]
       }
     ],
