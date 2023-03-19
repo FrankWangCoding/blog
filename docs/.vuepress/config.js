@@ -38,16 +38,9 @@ module.exports = {
         title: '个人的零零碎碎的总结',
         collapsable: true,
         children: [
-          '/personnelStudy/RouterInProject.md'
+          '/PersonnelStudy/RouterInProject.md'
         ]
-      },{
-        title: '面试题整理',
-        collapsable: true,
-        children: [
-          '/interview/js/handwritting.md'
-        ]
-      }
-    ],
+      } ],
     markdown: {
       // 显示代码块行号
       lineNumbers: true

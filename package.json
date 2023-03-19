@@ -10,9 +10,12 @@
     "deploy": "bash deploy.sh"
   },
   "devDependencies": {
-    "vuepress": "^1.8.2"
+    "vuepress": "^1.9.9"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "n": "^9.0.1"
+  }
 }
