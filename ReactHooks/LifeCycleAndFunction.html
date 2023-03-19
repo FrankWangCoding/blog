@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>如何正确的理解函数组件的生命周期 | 爬坑中的王小二</title>
+    <meta name="generator" content="VuePress 1.9.9">
+    <link rel="icon" href="/blog/image/favicon.ico">
+    <meta name="description" content="个人的一些总结，随意写写">
+    
+    <link rel="preload" href="/blog/assets/css/0.styles.75b0cbf8.css" as="style"><link rel="preload" href="/blog/assets/js/app.dd524133.js" as="script"><link rel="preload" href="/blog/assets/js/2.5687907e.js" as="script"><link rel="preload" href="/blog/assets/js/14.fab6c0ef.js" as="script"><link rel="prefetch" href="/blog/assets/js/10.bf869da4.js"><link rel="prefetch" href="/blog/assets/js/11.91bf9c55.js"><link rel="prefetch" href="/blog/assets/js/12.2f643498.js"><link rel="prefetch" href="/blog/assets/js/13.14ba96b5.js"><link rel="prefetch" href="/blog/assets/js/15.5a53bf95.js"><link rel="prefetch" href="/blog/assets/js/3.a3bc1a65.js"><link rel="prefetch" href="/blog/assets/js/4.a5cccfda.js"><link rel="prefetch" href="/blog/assets/js/5.bfef3080.js"><link rel="prefetch" href="/blog/assets/js/6.2d0a63f8.js"><link rel="prefetch" href="/blog/assets/js/7.d38e45ce.js"><link rel="prefetch" href="/blog/assets/js/8.5b45d7e2.js"><link rel="prefetch" href="/blog/assets/js/9.acb11d62.js">
+    <link rel="stylesheet" href="/blog/assets/css/0.styles.75b0cbf8.css">
+  </head>
+  <body>
+    <div id="app" data-server-rendered="true"><div class="theme-container"><header class="navbar"><div class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/blog/" class="home-link router-link-active"><!----> <span class="site-name">爬坑中的王小二</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/blog/" class="nav-link">
+  首页
+</a></div><div class="nav-item"><a href="/blog/JSRedBook/Base.html" class="nav-link">
+  博客
+</a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <aside class="sidebar"><nav class="nav-links"><div class="nav-item"><a href="/blog/" class="nav-link">
+  首页
+</a></div><div class="nav-item"><a href="/blog/JSRedBook/Base.html" class="nav-link">
+  博客
+</a></div> <!----></nav>  <ul class="sidebar-links"><li><section class="sidebar-group collapsable depth-0"><p class="sidebar-heading"><span>JavaScript高级程序设计笔记</span> <span class="arrow right"></span></p> <!----></section></li><li><section class="sidebar-group collapsable depth-0"><p class="sidebar-heading open"><span>React Hooks</span> <span class="arrow down"></span></p> <ul class="sidebar-links sidebar-group-items"><li><a href="/blog/ReactHooks/BaseHooks.html" class="sidebar-link">Hooks简介和基本Hooks使用</a></li><li><a href="/blog/ReactHooks/ExtensionHooks.html" class="sidebar-link">拓展Hooks</a></li><li><a href="/blog/ReactHooks/LifeCycleAndFunction.html" aria-current="page" class="active sidebar-link">如何正确的理解函数组件的生命周期</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/ReactHooks/LifeCycleAndFunction.html#忘掉class组件的声明周期" class="sidebar-link">忘掉Class组件的声明周期</a></li><li class="sidebar-sub-header"><a href="/blog/ReactHooks/LifeCycleAndFunction.html#重新思考组件的生命周期" class="sidebar-link">重新思考组件的生命周期</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/blog/ReactHooks/LifeCycleAndFunction.html#构造函数" class="sidebar-link">构造函数</a></li><li class="sidebar-sub-header"><a href="/blog/ReactHooks/LifeCycleAndFunction.html#三种常用的生命周期方法" class="sidebar-link">三种常用的生命周期方法</a></li></ul></li><li class="sidebar-sub-header"><a href="/blog/ReactHooks/LifeCycleAndFunction.html#其它的生命周期方法" class="sidebar-link">其它的生命周期方法</a></li><li class="sidebar-sub-header"><a href="/blog/ReactHooks/LifeCycleAndFunction.html#已有项目是否应该迁移到hooks" class="sidebar-link">已有项目是否应该迁移到Hooks？</a></li></ul></li></ul></section></li><li><section class="sidebar-group collapsable depth-0"><p class="sidebar-heading"><span>个人的零零碎碎的总结</span> <span class="arrow right"></span></p> <!----></section></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="如何正确的理解函数组件的生命周期"><a href="#如何正确的理解函数组件的生命周期" class="header-anchor">#</a> 如何正确的理解函数组件的生命周期</h1> <p>从Class组件切换到函数组件的思考方式是需要一个过程的。Class组件定义了各种的生命周期函数，它定义了组件在每个阶段会进行的动作。而函数组件则更加纯粹和自然一些。我们所需要关注的只是变量的改变即可。所以这里就需要引出一个问题，我们应该如何从Class组件切换到函数组件的思考方式呢？</p> <h2 id="忘掉class组件的声明周期"><a href="#忘掉class组件的声明周期" class="header-anchor">#</a> 忘掉Class组件的声明周期</h2> <p>Class组件现在仍然大量存在，这有两点原因：</p> <ul><li>一是 React 团队尽最大努力保持 API 的稳定，不希望给你造成一种 Class 组件将被废弃的感觉。</li> <li>二是大量的存量应用其实还都是用 Class 组件实现的，无论是对于维护者还是加入者来说，了解 Class 组件都是很有必要的。</li></ul> <p>但是函数组件和Class组件的开发方式是有很大的不同的。如果是从Class组件切换到Hooks的方式，最重要的就是忘掉Class组件中的生命周期的概念，不要将原有的Class组件的开发习惯映射到函数组件中。</p> <p>为理解函数组件的执行过程，不妨思考一下React的本质：**Model到View的映射。**假设状态永远不变，那么函数组件实际上是相当一个模板引擎，只执行一次。但是React本身就是为了动态的状态变化而设计的。而引起变化的原因基本上只有两个：</p> <p>1.用户操作产生的事件。比如点击了某个按钮。</p> <p>2.副作用产生的事件，比如发起某个请求正确返回了。</p> <p>这两个事件本身不会导致组件的重新渲染。但是我们在这两个事件处理函数中，一定是因为改变了某个状态，这个状态可能是State或者Context，从而导致了UI的重新渲染。</p> <p>对于第一种情况，其实函数组件和 Class 组件的思路几乎完全一样：通过事件处理函数来改变某个状态。对于第二种情况，在函数组件中则是通过useEffect这个Hooks更加直观和语义化的方式来进行描述。对应到Class组件，则是通过手动判断Props或者State的变化来执行的。</p> <p>比如如下两段代码，Class组件和函数组件的实现方式是不同的。</p> <p>Class组件：</p> <div class="language-js extra-class"><pre class="language-js"><code>
+<span class="token keyword">class</span> <span class="token class-name">BlogView</span> <span class="token keyword">extends</span> <span class="token class-name">React<span class="token punctuation">.</span>Component</span> <span class="token punctuation">{</span>
+  <span class="token comment">// ...</span>
+  <span class="token function">componentDidMount</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 组件第一次加载时去获取 Blog 数据</span>
+    <span class="token function">fetchBlog</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>props<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+  <span class="token function">componentDidUpdate</span><span class="token punctuation">(</span><span class="token parameter">prevProps</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+    <span class="token keyword">if</span> <span class="token punctuation">(</span>prevProps<span class="token punctuation">.</span>id <span class="token operator">!==</span> <span class="token keyword">this</span><span class="token punctuation">.</span>props<span class="token punctuation">.</span>id<span class="token punctuation">)</span> <span class="token punctuation">{</span>
+      <span class="token comment">// 当 Blog 的 id 发生变化时去获取博客文章</span>
+      <span class="token function">fetchBlog</span><span class="token punctuation">(</span><span class="token keyword">this</span><span class="token punctuation">.</span>props<span class="token punctuation">.</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span>
+  <span class="token punctuation">}</span>
+  <span class="token comment">// ...</span>
+<span class="token punctuation">}</span>
+</code></pre></div><p>函数组件：</p> <div class="language-js extra-class"><pre class="language-js"><code>
+<span class="token keyword">function</span> <span class="token function">BlogView</span><span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> id <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token function">useEffect</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 当 id 变化时重新获取博客文章</span>
+    <span class="token function">fetchBlog</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>id<span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span> <span class="token comment">// 定义了依赖项 id</span>
+<span class="token punctuation">}</span>
+</code></pre></div><p>可以看到，在函数组件中需要思考的方式永远是：当某个状态发生变化的时候，我要做什么。而不是在某个生命周期里面我要做什么。也就是，我们只需要观察状态的改变本身，整理和观察哪些操作会引起状态的变化就可以了。</p> <h2 id="重新思考组件的生命周期"><a href="#重新思考组件的生命周期" class="header-anchor">#</a> 重新思考组件的生命周期</h2> <p>在传统的类组件中，有专门定义的生命周期方法用于执行不同的逻辑，那么它们在函数组件的存在的形式又是什么样的呢？</p> <h3 id="构造函数"><a href="#构造函数" class="header-anchor">#</a> 构造函数</h3> <p>在类组件中有一个方法叫constructor，在里面我们会做一些初始化的事情，比如设置State的初始状态，或者定义一些类的实例成员。</p> <p>而现在，函数组件只是一个函数，那么也就没有构造函数的说法了。</p> <p>那么在函数组件中，我们应该如何去做一些初始化的事情呢？答案是：函数组件基本没有统一的初始化需要，因为Hooks会负责自己的初始化。比如 useState 这个 Hook，接收的参数就是定义的 State 初始值。而在过去的类组件中，你通常需要在构造函数中直接设置 this.state ，也就是设置某个值来完成初始化。</p> <p>但是要注意了，我提到的“基本上没有初始化需要”，也就是并不是完全没有。严格来说，虽然需求不多，但类组件中构造函数能做的不只是初始化 State，还可能有其它的逻辑。那么如果一定要在函数组件中实现构造函数应该怎么做呢？</p> <p>那么我们就需要看构造函数的本质是什么了，需要干的是啥，其实就是：在所有其它代码执行之前的一次性初始化工作。那么目标就变得很明确了：<strong>就是一次性的代码执行。</strong></p> <p>虽然没有直接的机制能直接做到这一点，但是可以借助useRef这一个钩子，实现一个useSingleton这样一次性执行某段代码的自定义Hook(其实这个在react-use这个库也有类似实现，具体可以参考useFirstMountState这个方法，方式可能不太一样，但是能达到例子中需要实现的效果，可以自行发挥脑洞思考)。代码如下：</p> <div class="language-js extra-class"><pre class="language-js"><code>
+<span class="token keyword">import</span> <span class="token punctuation">{</span> useRef <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
+
+<span class="token comment">// 创建一个自定义 Hook 用于执行一次性代码</span>
+<span class="token keyword">function</span> <span class="token function">useSingleton</span><span class="token punctuation">(</span><span class="token parameter">callback</span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token comment">// 用一个 called ref 标记 callback 是否执行过</span>
+  <span class="token keyword">const</span> called <span class="token operator">=</span> <span class="token function">useRef</span><span class="token punctuation">(</span><span class="token boolean">false</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// 如果已经执行过，则直接返回</span>
+  <span class="token keyword">if</span> <span class="token punctuation">(</span>called<span class="token punctuation">.</span>current<span class="token punctuation">)</span> <span class="token keyword">return</span><span class="token punctuation">;</span>
+  <span class="token comment">// 第一次调用时直接执行</span>
+  <span class="token function">callBack</span><span class="token punctuation">(</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token comment">// 设置标记为已执行过</span>
+  called<span class="token punctuation">.</span>current <span class="token operator">=</span> <span class="token boolean">true</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span>
+</code></pre></div><p>使用这个自定义Hook:</p> <div class="language-js extra-class"><pre class="language-js"><code>
+<span class="token keyword">import</span> useSingleton <span class="token keyword">from</span> <span class="token string">'./useSingleton'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">const</span> <span class="token function-variable function">MyComp</span> <span class="token operator">=</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token comment">// 使用自定义 Hook</span>
+  <span class="token function">useSingleton</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'这段代码只执行一次'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+
+  <span class="token keyword">return</span> <span class="token punctuation">(</span>
+    <span class="token operator">&lt;</span>div<span class="token operator">&gt;</span>My Component<span class="token operator">&lt;</span><span class="token operator">/</span>div<span class="token operator">&gt;</span>
+  <span class="token punctuation">)</span><span class="token punctuation">;</span>
+<span class="token punctuation">}</span><span class="token punctuation">;</span>
+</code></pre></div><p>可以看出，这个Hook的核心逻辑就是定义只执行一次的代码。而是否在所有代码之前执行，则取决于在哪里调用。可以说，它的功能其实是包含了构造函数的功能的。</p> <p>所以在日常开发中，无需将功能映射到传统的生命周期的构造函数的概念。而是从函数的角度出发，思考功能如何实现。</p> <h3 id="三种常用的生命周期方法"><a href="#三种常用的生命周期方法" class="header-anchor">#</a> 三种常用的生命周期方法</h3> <p>在类组件中，componentDidMount，componentWillUnmount，componentDidUpdate这三个生命周期方法可以说是开发最常用到的。而在函数组件中，useEffect基本等价于是三个生命周期方法的集合。</p> <p>下面的代码展示了这个的用法：</p> <div class="language-js extra-class"><pre class="language-js"><code><span class="token function">useEffect</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+  <span class="token comment">// componentDidMount + componentDidUpdate</span>
+  console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'这里基本等价于 componentDidMount + componentDidUpdate'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// componentWillUnmount</span>
+    console<span class="token punctuation">.</span><span class="token function">log</span><span class="token punctuation">(</span><span class="token string">'这里基本等价于 componentWillUnmount'</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span>
+<span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>deps<span class="token punctuation">]</span><span class="token punctuation">)</span>
+</code></pre></div><p>之所以说是基本等价于而没有说是完全等价，有两个原因：</p> <p>1.useEffect这个Hook接收的callback，只有在依赖项变化的时候才会执行。而Class组件中的componentDidUpdate中则是一定会执行的。这样看来其实Hooks的机制更具有语义化一些，因为过去在componentDidUpdate中，我们通常需要判断某个状态是否发生变化，然后才执行对应的逻辑。</p> <p>2.callback返回的函数在下一次依赖项发生变化、组件销毁的时候执行（实际上是一个加强），而传统的componentWillUnmount只会在组件销毁的时候执行。</p> <p>第2点相对来说比较难理解，通过下面的例子可以进行进一步的佐证。</p> <div class="language-js extra-class"><pre class="language-js"><code>
+<span class="token keyword">import</span> React<span class="token punctuation">,</span> <span class="token punctuation">{</span> useEffect <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'react'</span><span class="token punctuation">;</span>
+<span class="token keyword">import</span> comments <span class="token keyword">from</span> <span class="token string">'./comments'</span><span class="token punctuation">;</span>
+
+<span class="token keyword">function</span> <span class="token function">BlogView</span><span class="token punctuation">(</span><span class="token parameter"><span class="token punctuation">{</span> id <span class="token punctuation">}</span></span><span class="token punctuation">)</span> <span class="token punctuation">{</span>
+  <span class="token keyword">const</span> handleCommentsChange <span class="token operator">=</span> <span class="token function">useCallback</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 处理评论变化的通知</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">[</span><span class="token punctuation">]</span><span class="token punctuation">)</span><span class="token punctuation">;</span>
+  <span class="token function">useEffect</span><span class="token punctuation">(</span><span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+    <span class="token comment">// 获取博客内容</span>
+    <span class="token function">fetchBlog</span><span class="token punctuation">(</span>id<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token comment">// 监听指定 id 的博客文章的评论变化通知</span>
+    <span class="token keyword">const</span> listener <span class="token operator">=</span> comments<span class="token punctuation">.</span><span class="token function">addListener</span><span class="token punctuation">(</span>id<span class="token punctuation">,</span> handleCommentsChange<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    
+    <span class="token keyword">return</span> <span class="token punctuation">(</span><span class="token punctuation">)</span> <span class="token operator">=&gt;</span> <span class="token punctuation">{</span>
+      <span class="token comment">// 当 id 发生变化时，移除之前的监听</span>
+      comments<span class="token punctuation">.</span><span class="token function">removeListener</span><span class="token punctuation">(</span>listener<span class="token punctuation">)</span><span class="token punctuation">;</span>
+    <span class="token punctuation">}</span><span class="token punctuation">;</span>
+  <span class="token punctuation">}</span><span class="token punctuation">,</span> <span class="token punctuation">[</span>id<span class="token punctuation">,</span> handleCommentsChange<span class="token punctuation">]</span><span class="token punctuation">)</span>
+<span class="token punctuation">}</span>
+</code></pre></div><p>可以比较清楚的看到，useEffect接收的返回值是一个回调函数，这个回调函数不仅在组件销毁的时候执行，而是在Effect重新执行前，都会执行，它用来清除上一次Effect的执行结果。</p> <p>理解这一点很重要，useEffect返回的回调函数，只是清理当前执行的Effect本身。这其实是更加语义化的，因此不必将其映射到componentWillUnmount。只需要记住它的作用就是清理上一次Effect的结果就行。</p> <h2 id="其它的生命周期方法"><a href="#其它的生命周期方法" class="header-anchor">#</a> 其它的生命周期方法</h2> <p>刚才列举了几个 Class 组件中最为常用的生命周期方法，并介绍了对于同样的需求，在函数组件中应该如何去用 Hooks 的机制重新思考它们的实现。这已经能覆盖绝大多数的应用场景了。</p> <p>但是 Class 组件中还有其它一些比较少用的方法，比如 getSnapshotBeforeUpdate, componentDidCatch, getDerivedStateFromError。比较遗憾的是目前 Hooks 还没法实现这些功能。因此如果必须用到，你的组件仍然需要用类组件去实现。</p> <h2 id="已有项目是否应该迁移到hooks"><a href="#已有项目是否应该迁移到hooks" class="header-anchor">#</a> 已有项目是否应该迁移到Hooks？</h2> <p>答案是完全没必要。</p> <p>有如下两方面原因：</p> <p>1.类组件和函数组件可以互相引用。</p> <p>2.Hooks 很容易就能转换成高阶组件，并供类组件使用。</p></div> <footer class="page-edit"><!----> <div class="last-updated"><span class="prefix">最后更新时间:</span> <span class="time">10/5/2021, 7:42:13 PM</span></div></footer> <div class="page-nav"><p class="inner"><span class="prev">
+      ←
+      <a href="/blog/ReactHooks/ExtensionHooks.html" class="prev">
+        拓展Hooks
+      </a></span> <span class="next"><a href="/blog/PersonnelStudy/RouterInProject.html">
+        从项目切入，浅谈react-router的使用及HashRouter的内部机制
+      </a>
+      →
+    </span></p></div> </main></div><div class="global-ui"></div></div>
+    <script src="/blog/assets/js/app.dd524133.js" defer></script><script src="/blog/assets/js/2.5687907e.js" defer></script><script src="/blog/assets/js/14.fab6c0ef.js" defer></script>
+  </body>
+</html>
